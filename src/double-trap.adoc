@@ -1,7 +1,7 @@
 [[header]]
-:description: Zaamo and Zalrsc Extensions
+:description: Double Trap Extensions
 :company: RISC-V.org
-:revdate: 12/2023
+:revdate: 01/2024
 :revnumber: 0.7
 :revremark: This document is in development state. See http://riscv.org/spec-state for details.
 :url-riscv: http://riscv.org
@@ -33,7 +33,7 @@ endif::[]
 :footnote:
 :xrefstyle: short
 
-= Zaamo and Zalrsc Extensions
+= Double Trap Extensions
 
 // Preamble
 [WARNING]
@@ -58,54 +58,4 @@ Copyright 2023 by RISC-V International.
 This RISC-V specification has been contributed to directly or indirectly by:
 Ved Shanbhogue
 
-== Atomic Memory Operations Extension (Zaamo) 
-
-The Zaamo extension comprises the atomic memory operation (AMO) subset of the A
-extension.
-
-For RV32, the Zaamo extension includes the following instructions:
-
-* `AMOSWAP.W`
-* `AMOADD.W`
-* `AMOAND.W`
-* `AMOOR.W`
-* `AMOXOR.W`
-* `AMOMAX[U].W`
-* `AMOMIN[U].W`
-
-For RV64, the Zaamo extension includes the following instructions:
-
-* `AMOSWAP.W/D`
-* `AMOADD.W/D`
-* `AMOAND.W/D`
-* `AMOOR.W/D`
-* `AMOXOR.W/D`
-* `AMOMAX[U].W/D`
-* `AMOMIN[U].W/D`
-
-The Zacas extension depends on the Zaamo extension.
-
-[NOTE]
-====
-The Zaamo extension enables microcontroller class implementations to utilize
-atomic primitives from the AMO subset of the A extension. Typically such
-implementations do not have caches and thus may not be able to naturally support
-the `LR`/`SC` instructions provided by the A extension.
-====
-
-== Load-Reserved/Store-conditional Extension (Zalrsc) 
-
-The Zalrsc extension comprises the Load-Reserved/Store-Conditional instruction
-subset of the A extension.
-
-For RV32, the Zalrsc extension includes the `LR.W` and `SC.W` instructions.
-
-For RV64, the Zalrsc extension includes the `LR.W/D` and `SC.W/D` instructions.
-
-[NOTE]
-====
-The fetch-and-op style atomic primitives provided by the A extension support
-better scaling for highly parallel systems. Simpler implementations that do not
-have such scaling requirements may implement the Zalrsc subset of the A extension
-to support atomic primitives.
-====
+== Double Trap
