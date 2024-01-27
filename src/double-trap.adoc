@@ -1,0 +1,111 @@
+[[header]]
+:description: Zaamo and Zalrsc Extensions
+:company: RISC-V.org
+:revdate: 12/2023
+:revnumber: 0.7
+:revremark: This document is in development state. See http://riscv.org/spec-state for details.
+:url-riscv: http://riscv.org
+:doctype: book
+:preface-title: Preamble
+:colophon:
+:appendix-caption: Appendix
+:imagesdir: images
+:title-logo-image: image:risc-v_logo.png[pdfwidth=3.25in,align=center]
+// Settings:
+:experimental:
+:reproducible:
+// needs to be changed? bug discussion started
+//:WaveDromEditorApp: app/wavedrom-editor.app
+:imagesoutdir: images
+:icons: font
+:lang: en
+:listing-caption: Listing
+:sectnums:
+:toc: left
+:toclevels: 4
+:source-highlighter: pygments
+ifdef::backend-pdf[]
+:source-highlighter: coderay
+endif::[]
+:data-uri:
+:hide-uri-scheme:
+:stem: latexmath
+:footnote:
+:xrefstyle: short
+
+= Zaamo and Zalrsc Extensions
+
+// Preamble
+[WARNING]
+.This document is in the link:http://riscv.org/spec-state[Development state]
+====
+Assume everything can change. This draft specification will change before being
+accepted as standard, so implementations made to this draft specification will
+likely not conform to the future standard.
+====
+
+[preface]
+=== Copyright and license information
+This specification is licensed under the Creative Commons
+Attribution 4.0 International License (CC-BY 4.0). The full
+license text is available at
+https://creativecommons.org/licenses/by/4.0/.
+
+Copyright 2023 by RISC-V International.
+
+[preface]
+=== Contributors
+This RISC-V specification has been contributed to directly or indirectly by:
+Ved Shanbhogue
+
+== Atomic Memory Operations Extension (Zaamo) 
+
+The Zaamo extension comprises the atomic memory operation (AMO) subset of the A
+extension.
+
+For RV32, the Zaamo extension includes the following instructions:
+
+* `AMOSWAP.W`
+* `AMOADD.W`
+* `AMOAND.W`
+* `AMOOR.W`
+* `AMOXOR.W`
+* `AMOMAX[U].W`
+* `AMOMIN[U].W`
+
+For RV64, the Zaamo extension includes the following instructions:
+
+* `AMOSWAP.W/D`
+* `AMOADD.W/D`
+* `AMOAND.W/D`
+* `AMOOR.W/D`
+* `AMOXOR.W/D`
+* `AMOMAX[U].W/D`
+* `AMOMIN[U].W/D`
+
+The Zacas extension depends on the Zaamo extension.
+
+[NOTE]
+====
+The Zaamo extension enables microcontroller class implementations to utilize
+atomic primitives from the AMO subset of the A extension. Typically such
+implementations do not have caches and thus may not be able to naturally support
+the `LR`/`SC` instructions provided by the A extension.
+====
+
+== Load-Reserved/Store-conditional Extension (Zalrsc) 
+
+The Zalrsc extension comprises the Load-Reserved/Store-Conditional instruction
+subset of the A extension.
+
+For RV32, the Zalrsc extension includes the `LR.W` and `SC.W` instructions.
+
+For RV64, the Zalrsc extension includes the `LR.W/D` and `SC.W/D` instructions.
+
+[NOTE]
+====
+The fetch-and-op style atomic primitives provided by the A extension support
+better scaling for highly parallel systems. Simpler implementations that do not
+have such scaling requirements may implement the Zalrsc subset of the A extension
+to support atomic primitives.
+====
