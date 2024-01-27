@@ -56,6 +56,7 @@ Copyright 2023 by RISC-V International.
 [preface]
 === Contributors
 This RISC-V specification has been contributed to directly or indirectly by:
+Allen Baum, Andrew Waterman, Deepak Gupta, Greg Favor, Krste Asanovic,
 Ved Shanbhogue
 
 == Double Trap
@@ -197,12 +198,13 @@ the critical-error state.
 
 === Non-ISA Debug Module (DM) Extension
 
-A new optional control bit `DISPRR` is defined in the `dmcs2` register of the
-DM to manage `platform-reset-request`. When `DISPRR` is set to 1, the
-`platform-reset-request` asserted by any hart associated with that DM is masked.
-A new status bit `PRR` is defined in the `dmstatus` register of the DM. This bit
-is 1 if any of the harts associated with the debug module assert their
-`platform-reset-request`, before any masking of the request by `DISPRR`.
+The RISC-V Debug 1.0 specification is extended with a new optional control bit
+`DISPRR` is defined in the `dmcs2` register of the DM to manage
+`platform-reset-request`. When `DISPRR` is set to 1, the `platform-reset-request`
+asserted by any hart associated with that DM is masked. A new status bit `PRR`
+is defined in the `dmstatus` register of the DM. This bit is 1 if any of the
+harts associated with the debug module assert their `platform-reset-request`,
+before any masking of the request by `DISPRR`.
 
 [NOTE]
 ====
