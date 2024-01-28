@@ -56,8 +56,7 @@ Copyright 2023 by RISC-V International.
 [preface]
 === Contributors
 This RISC-V specification has been contributed to directly or indirectly by:
-Allen Baum, Andrew Waterman, Deepak Gupta, Greg Favor, Krste Asanovic,
-Ved Shanbhogue
+Allen Baum, Andrew Waterman, Deepak Gupta, Greg Favor, and Ved Shanbhogue
 
 == Double Trap
 
