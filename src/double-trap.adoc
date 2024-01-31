@@ -103,21 +103,21 @@ complement to the Ssdbltrp ISA extension.
 
 === Ssdbltrp and Smdbltrp Operational Details
 
-The Smdbltrp extension introduces an M-mode-Trap-disable (`MTD`) bit to the
+The Smdbltrp extension introduces an disable-traps-for-M-mode (`DTM`) bit to the
 `mstatus` CSR.
 
-The Ssdbltrp adds an S-mode-Trap-disable (`STD`) bit to the `mstatus` CSR and a
-double-trap-enable (`DTE`) bit to the `menvcfg` CSR. Ssdbltrp also adds a `STD`
-bit to the `vsstatus` CSR and a `DTE` bit to the `henvcfg` CSR if the
+The Ssdbltrp adds an disable-traps-for-S-mode (`DTS`) bit to the `mstatus` CSR
+and a double-trap-enable (`DTE`) bit to the `menvcfg` CSR. Ssdbltrp also adds a
+`DTS` bit to the `vsstatus` CSR and a `DTE` bit to the `henvcfg` CSR if the
 H-extension is implemented. When `menvcfg.DTE` is zero, the implementation
 behaves as though Ssdbltrp is not implemented. When Ssdbltrp is not implemented
-`mstatus.STD`, `vsstatus.STD`, and `henvcfg.DTE` bits are read-only zero. When
+`mstatus.DTS`, `vsstatus.DTS`, and `henvcfg.DTE` bits are read-only zero. When
 `henvcfg.DTE` is zero, the implementation behaves as though Ssdbltrp is not
-implemented for VS-mode and the `vsstatus.STD` bit is read-only zero.
+implemented for VS-mode and the `vsstatus.DTS` bit is read-only zero.
 
 
-When a trap is taken into privilege mode `x`, the `__x__TD` bit is set to 1 if
-it was not already set. However, if `__x__TD` is already set to 1, a double trap
+When a trap is taken into privilege mode `x`, the `TD__x__` bit is set to 1 if
+it was not already set. However, if `TD__x__` is already set to 1, a double trap
 condition is triggered. When the Smrnmi extensions is implemented, if a hart
 encounters an exception while executing in M-mode with the `mnstatus.NMIE` bit
 clear, a double trap condition is triggered.
@@ -136,7 +136,7 @@ In the event of a double trap, the handling varies based on the privilege mode:
 
 [NOTE]
 ====
-The trap handler should clear the `__x__TD` bit only after it has saved the
+The trap handler should clear the `TD__x__` bit only after it has saved the
 state, such as `__x__cause`, `__x__epc`, and `__x__tval`, needed to resume from
 the trap, and the trap handler is reentrant.
 
@@ -160,7 +160,7 @@ Additionally, the implementation of an SSE protocol can be considered as an
 optional measure to aid in the recovery from double trap conditions.
 ====
 
-When `__x__TD` is 1, interrupts delegated to privilege mode `x` are globally
+When `TD__x__` is 1, interrupts delegated to privilege mode `x` are globally
 disabled.
 
 [NOTE]
@@ -169,13 +169,13 @@ M-mode and HS-mode are capable of delivering virtual interrupts to S-mode and
 VS-mode using the `mvip`  and `hvip` registers, respectively, even if the actual
 interrupt has not been delegated. Additionally, HS-mode may utilize the `hvictl`
 register for managing virtual interrupts in VS-mode. When a trap is delivered,
-global interrupt masking is activated, by setting `__x__TD`, to prevent pending
+global interrupt masking is activated, by setting `TD__x__`, to prevent pending
 virtual interrupts from inadvertently causing a double trap condition. This
 situation could arise if the trap handler erroneously sets `__x__IE` without
-first clearing `__x__TD`. Such an error could lead to a pending virtual
+first clearing `TD__x__`. Such an error could lead to a pending virtual
 interrupt triggering a trap to HS-mode or M-mode, mimicking a real interrupt
 trap. To circumvent unnecessary handling in M-mode or HS-mode, interrupts are
-globally masked when `__x__TD` is set to 1.
+globally masked when `TD__x__` is set to 1.
 
 Furthermore, it is recommended that `MTD` be set to 1 at system reset,
 particularly in the absence of an appropriately configured trap handler.
@@ -193,7 +193,6 @@ If Sddbltrp is implemented, a hart in critical-error state enters Debug Mode
 with the `PCERR` bit in `dcsr` set to 1 upon receiving a `haltreq` from the
 Debug Module. Resuming from Debug Mode with `PCERR` is 1, returns the hart to
 the critical-error state.
-
 
 === Non-ISA Debug Module (DM) Extension
 
