@@ -186,6 +186,8 @@ Furthermore, it is recommended that `MDT` be set to 1 at system reset,
 particularly in the absence of an appropriately configured trap handler.
 ====
 
+<<<
+
 === Sddbltrp Operational Details
 
 The Sddbltrp extension introduces a previous-critical-error (`PCERR`) bit to the
