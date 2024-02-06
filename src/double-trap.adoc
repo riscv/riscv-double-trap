@@ -17,6 +17,9 @@
 // needs to be changed? bug discussion started
 //:WaveDromEditorApp: app/wavedrom-editor.app
 :imagesoutdir: images
+:bibtex-file: double_trap.bib
+:bibtex-order: appearance
+:bibtex-style: ieee
 :icons: font
 :lang: en
 :listing-caption: Listing
@@ -51,7 +54,7 @@ Attribution 4.0 International License (CC-BY 4.0). The full
 license text is available at
 https://creativecommons.org/licenses/by/4.0/.
 
-Copyright 2023 by RISC-V International.
+Copyright 2024 by RISC-V International.
 
 [preface]
 === Contributors
@@ -72,7 +75,7 @@ designed to neither enable interrupts nor cause exceptions during this phase of
 handling. However, managing Hardware-Error exceptions, which may occur
 unpredictably, presents a significant challenge in trap handler implementation
 due to the potential risk of a double trap condition triggered by such a
-Hardware-Error exception.
+Hardware-Error exception cite:[PRIV].
 
 Efficient and reliable fault handling is essential for ensuring robust
 operation. The ISA Double Trap Extensions is devised to tackle situations where
@@ -82,9 +85,10 @@ these extensions introduce strategies to manage such critical errors across
 different privilege levels.
 
 The following ISA extensions are defined to enhance fault handling capabilities:
+
 * Ssdbltrp: This extension is designed to address double trap conditions at
   privilege modes lower than M. It enables HS-mode to invoke a critical error
-  handler in the virtual machine when a double trap condition occurs in VS-mode,
+  handler in a virtual machine when a double trap condition occurs in VS-mode,
   and allows M-mode to invoke a critical error handler in the OS/Hypervisor when
   a double trap condition occurs in S/HS-mode.
 
@@ -103,29 +107,28 @@ complement to the Ssdbltrp ISA extension.
 
 === Ssdbltrp and Smdbltrp Operational Details
 
-The Smdbltrp extension introduces an disable-traps-for-M-mode (`DTM`) bit to the
+The Smdbltrp extension introduces an M-mode-disable-trap (`MDT`) bit to the
 `mstatus` CSR.
 
-The Ssdbltrp adds an disable-traps-for-S-mode (`DTS`) bit to the `mstatus` CSR
+The Ssdbltrp adds an S-mode-disable-trap (`SDT`) bit to the `mstatus` CSR
 and a double-trap-enable (`DTE`) bit to the `menvcfg` CSR. Ssdbltrp also adds a
-`DTS` bit to the `vsstatus` CSR and a `DTE` bit to the `henvcfg` CSR if the
+`SDT` bit to the `vsstatus` CSR and a `DTE` bit to the `henvcfg` CSR if the
 H-extension is implemented. When `menvcfg.DTE` is zero, the implementation
 behaves as though Ssdbltrp is not implemented. When Ssdbltrp is not implemented
-`mstatus.DTS`, `vsstatus.DTS`, and `henvcfg.DTE` bits are read-only zero. When
+`mstatus.SDT`, `vsstatus.SDT`, and `henvcfg.DTE` bits are read-only zero. When
 `henvcfg.DTE` is zero, the implementation behaves as though Ssdbltrp is not
-implemented for VS-mode and the `vsstatus.DTS` bit is read-only zero.
+implemented for VS-mode and the `vsstatus.SDT` bit is read-only zero.
 
-
-When a trap is taken into privilege mode `x`, the `TD__x__` bit is set to 1 if
-it was not already set. However, if `TD__x__` is already set to 1, a double trap
-condition is triggered. When the Smrnmi extensions is implemented, if a hart
+When a trap is taken into privilege mode `x`, the `__x__DT` bit is set to 1 if
+it was not already set. However, if `__x__DT` is already set to 1, a double trap
+condition is triggered. When the Smrnmi extensions is implemented, if the hart
 encounters an exception while executing in M-mode with the `mnstatus.NMIE` bit
 clear, a double trap condition is triggered.
 
 In the event of a double trap, the handling varies based on the privilege mode:
 
 * At Privilege Mode Less Than M: The hart redirects the trap to the next higher
-  privilege mode. This redirection delivers the trap as-if it was not delegated
+  privilege mode. This redirection delivers the trap as if it was not delegated
   to the mode where the double trap occurred. For VS-mode, the next higher
   privilege mode is HS-mode, and for S/HS-mode, it is M-mode.
 
@@ -136,15 +139,16 @@ In the event of a double trap, the handling varies based on the privilege mode:
 
 [NOTE]
 ====
-The trap handler should clear the `TD__x__` bit only after it has saved the
-state, such as `__x__cause`, `__x__epc`, and `__x__tval`, needed to resume from
-the trap, and the trap handler is reentrant.
+The trap handler should clear the `__x__DT` bit only after it has saved the
+state, including `__x__cause`, `__x__epc`, and `__x__tval` among others, needed
+to resume from the trap, and the trap handler is reentrant.
 
 A trap to HS-mode from VS-mode is due to a double trap condition in VS-mode if
-the bit corresponding to the exception code is set to 1 in `hideleg` for
-interrupts or in `hedeleg` for exceptions. A trap to M-mode from a S/HS-mode is
-due to a double trap in S/HS mode if the bit corresponding to the exception code
-is set to 1 in `mideleg` for interrupts or in `medeleg` for exceptions.
+the bit corresponding to the Exception Code in `scause` register is set to 1 in
+`hideleg` for interrupts or in `hedeleg` for exceptions. A trap to M-mode from a
+S/HS-mode is due to a double trap condition in S/HS mode if the bit
+corresponding to the Exception Code in `mcause` register is set to 1 in
+`mideleg` for interrupts or in `medeleg` for exceptions.
 
 Supervisor Software Events (SSE), an extension to the SBI, provide a mechanism
 for supervisor software to register and service system events emanating from an
@@ -153,14 +157,15 @@ higher priority, are processed even when the OS is in a critical section with
 interrupts disabled, thus being orthogonal to normal OS operations. The primary
 use case for SSE is in situations where event handling cannot afford the delay
 caused by interrupt masking in critical sections in the OS. Detailed information
-on this can be found in the relevant documentation. For instance, in the event
-of a double trap condition, HS-mode and M-mode can utilize the SSE mechanism to
-invoke a critical-error handler in VS-mode or S/HS-mode, respectively.
-Additionally, the implementation of an SSE protocol can be considered as an
-optional measure to aid in the recovery from double trap conditions.
+on this can be found in the relevant SSE documentation cite:[SSE]. For instance,
+in the event of a double trap condition, HS-mode and M-mode can utilize the SSE
+mechanism to invoke a critical-error handler in VS-mode or S/HS-mode,
+respectively. Additionally, the implementation of an SSE protocol can be
+considered as an optional measure to aid in the recovery from double trap
+conditions.
 ====
 
-When `TD__x__` is 1, interrupts delegated to privilege mode `x` are globally
+When `__x__DT` is 1, interrupts delegated to privilege mode `x` are globally
 disabled.
 
 [NOTE]
@@ -169,15 +174,15 @@ M-mode and HS-mode are capable of delivering virtual interrupts to S-mode and
 VS-mode using the `mvip`  and `hvip` registers, respectively, even if the actual
 interrupt has not been delegated. Additionally, HS-mode may utilize the `hvictl`
 register for managing virtual interrupts in VS-mode. When a trap is delivered,
-global interrupt masking is activated, by setting `TD__x__`, to prevent pending
+global interrupt masking is activated, by setting `__x__DT`, to prevent pending
 virtual interrupts from inadvertently causing a double trap condition. This
 situation could arise if the trap handler erroneously sets `__x__IE` without
-first clearing `TD__x__`. Such an error could lead to a pending virtual
+first clearing `__x__DT`. Such an error could lead to a pending virtual
 interrupt triggering a trap to HS-mode or M-mode, mimicking a real interrupt
 trap. To circumvent unnecessary handling in M-mode or HS-mode, interrupts are
-globally masked when `TD__x__` is set to 1.
+globally masked when `__x__DT` is set to 1.
 
-Furthermore, it is recommended that `MTD` be set to 1 at system reset,
+Furthermore, it is recommended that `MDT` be set to 1 at system reset,
 particularly in the absence of an appropriately configured trap handler.
 ====
 
@@ -197,12 +202,12 @@ the critical-error state.
 === Non-ISA Debug Module (DM) Extension
 
 The RISC-V Debug 1.0 specification is extended with a new optional control bit
-`DISPRR` is defined in the `dmcs2` register of the DM to manage
+`DISPRR`, defined in the `dmcs2` register of the DM, to manage
 `platform-reset-request`. When `DISPRR` is set to 1, the `platform-reset-request`
 asserted by any hart associated with that DM is masked. A new status bit `PRR`
 is defined in the `dmstatus` register of the DM. This bit is 1 if any of the
-harts associated with the debug module assert their `platform-reset-request`,
-before any masking of the request by `DISPRR`.
+harts associated with the DM assert their `platform-reset-request`, before any
+masking of the request by `DISPRR`.
 
 [NOTE]
 ====
@@ -210,3 +215,8 @@ The `DISPRR` control enables an external debugger to disable the reset and
 instead enter Debug Mode in a hart that is in critical-error state and
 investigate the cause of a double trap condition.
 ====
+
+[bibliography]
+== Bibliography
+
+bibliography::[]
