@@ -125,12 +125,12 @@ implementation behaves as though Ssdbltrp is not implemented for VS-mode and the
 `vsstatus.SDT` bit is read-only zero. The bit corresponding to the double trap
 Exception Code is read-only zero in `hedeleg` CSR.
 
-When a trap is to be taken into privilege mode `x`, the `__x__DT` bit is set to
-1 if it was not already set and the trap is delivered normally. However, if
-`__x__DT` is already set to 1, a double trap condition is triggered. When the
-Smrnmi extension is implemented, if the hart encounters an exception while
-executing in M-mode with the `mnstatus.NMIE` bit clear, a double trap condition
-is triggered.
+When a trap is to be taken into privilege mode `x`, if the `__x__DT` bit is
+currently 0, it is then set to 1, and the trap is delivered as expected. However,
+if `__x__DT` is already set to 1, a double trap condition occurs. Additionally,
+when the Smrnmi extension is implemented, encountering an exception while
+executing in M-mode with the `mnstatus.NMIE` bit clear similarly results in a
+double trap condition.
 
 In the event of a double trap, the handling varies based on the privilege mode:
 
