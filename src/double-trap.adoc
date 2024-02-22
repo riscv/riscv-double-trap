@@ -191,16 +191,6 @@ optional measure to aid in the recovery from such critical errors.
      the `mncause` register is set to 16, the double trap exception code, and
      its Interrupt field is set to 0.
 
-[NOTE]
-====
-The consequence of this specification is that while the RNMI handler is invoked
-to notify the occurrence of a double trap in M-mode, the RNMI handler is not
-provided with any information about the initial trap that triggered the double
-trap. A double trap generally represents an irrecoverable condition. Invoking
-the RNMI handler enables performing actions such as capturing crash dumps and
-preparing the system to shutdown and/or restart in a controlled manner.
-====
-
 * In M-mode, when the Smrnmi extension is implemented and `mnstatus.NMIE` is 0,
   or if the Smrnmi extension is not implemented, the hart enters a critical-error
   state without updating any architectural state. This state involves ceasing
@@ -209,6 +199,13 @@ preparing the system to shutdown and/or restart in a controlled manner.
 
 [NOTE]
 ====
+The consequence of this specification is that while the RNMI handler is invoked
+to notify the occurrence of a double trap in M-mode, the RNMI handler is not
+provided with any information about the initial trap that triggered the double
+trap. A double trap generally represents an irrecoverable condition. Invoking
+the RNMI handler enables performing actions such as capturing crash dumps and
+preparing the system to shutdown and/or restart in a controlled manner.
+
 The actions performed by the platform on assertion of a `critical-error` signal
 by a hart are platform specific. The range of possible actions include restarting
 the affected hart or restarting the entire platform among others.
