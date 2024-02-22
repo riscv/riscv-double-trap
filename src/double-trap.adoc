@@ -94,8 +94,13 @@ The following ISA extensions are defined to enhance fault handling capabilities:
   a double trap condition occurs in S/HS-mode.
 
 * Smdbltrp: This extension specifically addresses double trap conditions in
-  M-mode. It facilitates transitioning the hart to a critical error state on a
-  double trap condition in M-mode and enables the request for a platform reset.
+  M-mode. When the Smrnmi extension is also implemented, the Smdbltrp extension
+  enables invocation of the RNMI handler on a double trap condition in M-mode to
+  handle the critical error. When the Smrnmi extension is not implemented or if
+  a double trap condition occurs during the RNMI handlers execution, the
+  Smdbltrp extension facilitates transitioning the hart to a critical error
+  state on a double trap condition in M-mode and enables the signaling the error
+  to the platform.
 
 * Sddbltrp: Aimed at improving error diagnosis and resolution, this extension
   supports external debugging of harts in a critical error state, particularly
@@ -110,20 +115,19 @@ complement to the Ssdbltrp ISA extension.
 
 The Smdbltrp extension introduces an M-mode-disable-trap (`MDT`) field (bit 24)
 to the `mstatus` CSR. Upon reset, the `MDT` field is set to 1. The Smdbltrap
-extension introduces a new Exception Code called the double trap. The bit
-corresponding to the double trap Exception Code is read-only zero in
-`medeleg` CSR.
+extension introduces a new Exception Code (value = 0x16)  called the double
+trap. The bit 16 of the `medeleg` CSR is read-only zero.
 
 The Ssdbltrp adds an S-mode-disable-trap (`SDT`) field (bit 23) to the `mstatus`
 CSR and a double-trap-enable (`DTE`) field (bit 60) to the `menvcfg` CSR. If the
 H-extension is implemented, Ssdbltrp also adds a `SDT` field (bit 23) to the
-`vsstatus` CSR and a `DTE` field (bit 60) to the `henvcfg` CSR. When
+`vsstatus` CSR and a `DTE` field (bit 59) to the `henvcfg` CSR. When
 `menvcfg.DTE` is zero, the implementation behaves as though Ssdbltrp is not
 implemented. When Ssdbltrp is not implemented `mstatus.SDT`, `vsstatus.SDT`, and
 `henvcfg.DTE` bits are read-only zero. When `henvcfg.DTE` is zero, the
 implementation behaves as though Ssdbltrp is not implemented for VS-mode and the
-`vsstatus.SDT` bit is read-only zero. The bit corresponding to the double trap
-Exception Code is read-only zero in `hedeleg` CSR.
+`vsstatus.SDT` bit is read-only zero. The bit 16 of the `hedeleg` CSR is
+read-only zero.
 
 When a trap is to be taken into privilege mode `x`, if the `__x__DT` bit is
 currently 0, it is then set to 1, and the trap is delivered as expected. However,
@@ -134,23 +138,31 @@ double trap condition.
 
 In the event of a double trap, the handling varies based on the privilege mode:
 
-* At privilege mode less than M: The hart redirects the trap to the next higher
-  privilege mode but with a transformed Exception Code. This redirection
-  delivers the trap as if it was not delegated to the mode where the double trap
-  occurred. For VS-mode, the next higher privilege mode is HS-mode, and for
-  S/HS-mode, it is M-mode.                                                     +
-                                                                               +
-  The Exception Code transformation process is as follows:
+* At privilege mode less than M: The hart delivers a double trap exception to
+  M-mode using the following process:
 
-  ** If the trap is redirected to S/HS-mode, the value held in `scause` register
-     value is copied to `htval` register. Then the `Exception Code` field of
-     `scause` register is updated to double trap Exception Code and the
-     `Interrupt` field of the `scause` register is set to 0.
+  ** The `mtinst` and `mtval` registers capture the same information the initial
+     trap would have provided.
 
-  ** If the trap is redirected to M-mode, the value held in `mcause` register
-     value is copied to `mtval2` register. Then the `Exception Cause` field of
-     `mcause` register is updated to double trap Exception Code and the
-     `Interrupt` field of the `mcause` register is set to 0.
+  ** The `mtval2` register, unlike `mtinst` and `mtval`, is set to what would be
+     otherwise 
+     
+     would appear in the `mcause` register because of the trap detecting the
+     double trap condition, not the value from the trap itself.
+
+  ** The Exception Code in the `mcause` register set set to 16, and its
+     Interrupt field is set to 0.
+
+  ** The `mtinst` and `mtval` registers are written with the values as would be
+     reported by the trap that triggered the double trap condition.
+
+  ** The `mtval2` register, instead of being written with the value as would be
+     reported by the trap that triggered the double trap condition, is written 
+     with the value that would be reported by that trap in the `mcause`
+     register.
+
+  ** The Exception Code field of `mcause` register is set to 16 and its Interrupt
+     field is set to 0.
 
 * In M-mode: The hart enters a critical-error state without updating any
   architectural state. This state involves ceasing execution, disabling all
