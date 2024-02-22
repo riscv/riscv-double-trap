@@ -103,8 +103,8 @@ The following ISA extensions are defined to enhance fault handling capabilities:
   to the platform.
 
 * Sddbltrp: Aimed at improving error diagnosis and resolution, this extension
-  supports external debugging of harts in a critical error state, particularly
-  resulting from a double trap condition in M-mode.
+  supports external debugging of harts in a critical error state, resulting from
+  a double trap condition in M-mode.
 
 In addition to these, a non-ISA extension to the RISC-V Debug specification 1.0
 is defined. This extension is intended for external debugging of harts in a
@@ -116,20 +116,17 @@ complement to the Ssdbltrp ISA extension.
 The Smdbltrp extension introduces an M-mode-disable-trap (`MDT`) field (bit 24)
 to the `mstatus` CSR. Upon reset, the `MDT` field is set to 1. The Smdbltrp
 extension introduces a new Exception Code (value = 0x10)  called the double
-trap.
-
-The Ssdbltrp adds an S-mode-disable-trap (`SDT`) field (bit 23) to the `mstatus`
-CSR and a double-trap-enable (`DTE`) field (bit 60) to the `menvcfg` CSR. If the
-H-extension is implemented, Ssdbltrp also adds a `SDT` field (bit 23) to the
-`vsstatus` CSR and a `DTE` field (bit 59) to the `henvcfg` CSR.
+trap. The Ssdbltrp adds an S-mode-disable-trap (`SDT`) field (bit 23) to the
+`mstatus` CSR and a double-trap-enable (`DTE`) field (bit 60) to the `menvcfg`
+CSR. If the H-extension is implemented, Ssdbltrp also adds a `SDT` field
+(bit 23) to the `vsstatus` CSR and a `DTE` field (bit 59) to the `henvcfg` CSR.
+The bit 16 of the `medeleg` and the `hedeleg` CSR are read-only zero.
 
 When `menvcfg.DTE` is zero, the implementation behaves as though Ssdbltrp is not
 implemented. When Ssdbltrp is not implemented `mstatus.SDT`, `vsstatus.SDT`, and
 `henvcfg.DTE` bits are read-only zero. When `henvcfg.DTE` is zero, the
 implementation behaves as though Ssdbltrp is not implemented for VS-mode and the
 `vsstatus.SDT` bit is read-only zero.
-
-The bit 16 of the `medeleg` and the `hedeleg` CSR are read-only zero.
 
 When a trap is to be taken into privilege mode `x`, if the `__x__DT` bit is
 currently 0, it is then set to 1, and the trap is delivered as expected. However,
@@ -168,7 +165,7 @@ HS-mode uses the hypervisor load/store instructions when `sstatus.SDT` is 1 and
 the instruction raises a guest page-fault. The use of a hypervisor load/store
 instruction in this phase of trap handling is not common. However, not recording
 the GPA is considered benign because, if required, it can still be obtained
---albeit with added effort-- by software through the process of walking the page
+-- albeit with added effort -- by software through the process of walking the page
 tables.
 
 For a double trap to M-mode that originates due to a double trap condition
