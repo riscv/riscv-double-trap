@@ -250,7 +250,7 @@ the critical-error state.
 
 The RISC-V Debug 1.0 specification is extended with a new optional control bit
 suppress-critical-error-signal (`scerr`), defined in the `dmcs2` register
-(bit 12) of the DM, to manage `critical-error` signal. 
+(bit 12) of the DM, to manage the `critical-error` signal. 
 
 When `scerr` is set to 1, the `critical-error` signal asserted by any hart
 associated with that DM is masked and prevented from causing its normal
