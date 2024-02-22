@@ -64,19 +64,18 @@ Hauser, and Ved Shanbhogue
 
 == Double Trap
 
-A double trap condition typically arises during a sensitive phase in trap
-handling operations - when an exception or interrupt occurs while the trap
-handler, the component responsible for managing these events, is in a
-non-reentrant state. This non-reentrancy usually occurs in the early phase of
-trap handling, where the trap handler hasn't yet preserved the necessary state
-to handle and resume from the trap. The occurrence of a second trap during this
-phase can lead to an overwrite of this critical state information, resulting in
-the loss of data needed to recover from the initial trap. Trap handlers are
-designed to neither enable interrupts nor cause exceptions during this phase of
-handling. However, managing Hardware-Error exceptions, which may occur
-unpredictably, presents a significant challenge in trap handler implementation
-due to the potential risk of a double trap condition triggered by such a
-Hardware-Error exception cite:[PRIV].
+A double trap typically arises during a sensitive phase in trap handling
+operations - when an exception or interrupt occurs while the trap handler, the
+component responsible for managing these events, is in a non-reentrant state.
+This non-reentrancy usually occurs in the early phase of trap handling, where
+the trap handler hasn't yet preserved the necessary state to handle and resume
+from the trap. The occurrence of a second trap during this phase can lead to an
+overwrite of this critical state information, resulting in the loss of data
+needed to recover from the initial trap. Trap handlers are designed to neither
+enable interrupts nor cause exceptions during this phase of handling. However,
+managing Hardware-Error exceptions, which may occur unpredictably, presents a
+significant challenge in trap handler implementation due to the potential risk of
+a double trap triggered by such a Hardware-Error exception cite:[PRIV].
 
 Efficient and reliable fault handling is essential for ensuring robust
 operation. The ISA Double Trap Extensions is devised to tackle situations where
@@ -87,29 +86,28 @@ different privilege levels.
 
 The following ISA extensions are defined to enhance fault handling capabilities:
 
-* Ssdbltrp: This extension is designed to address double trap conditions at
-  privilege modes lower than M. It enables HS-mode to invoke a critical error
-  handler in a virtual machine when a double trap condition occurs in VS-mode,
-  and allows M-mode to invoke a critical error handler in the OS/Hypervisor when
-  a double trap condition occurs in S/HS-mode.
+* Ssdbltrp: This extension is designed to address double trap at privilege modes
+  lower than M. It enables HS-mode to invoke a critical error handler in a
+  virtual machine when a double trap occurs in VS-mode, and allows M-mode to
+  invoke a critical error handler in the OS/Hypervisor when a double trap in
+  S/HS-mode.
 
-* Smdbltrp: This extension specifically addresses double trap conditions in
-  M-mode. When the Smrnmi extension is also implemented, the Smdbltrp extension
-  enables invocation of the RNMI handler on a double trap condition in M-mode to
-  handle the critical error. When the Smrnmi extension is not implemented or if
-  a double trap condition occurs during the RNMI handlers execution, the
-  Smdbltrp extension facilitates transitioning the hart to a critical error
-  state on a double trap condition in M-mode and enables the signaling the error
-  to the platform.
+* Smdbltrp: This extension specifically addresses double trap in M-mode. When the
+  Smrnmi extension cite:[SMRNMI] is also implemented, the Smdbltrp extension
+  enables invocation of the RNMI handler on a double trap in M-mode to handle
+  the critical error. When the Smrnmi extension is not implemented or if a
+  double trap occurs during the RNMI handlers execution, the Smdbltrp extension
+  facilitates transitioning the hart to a critical error state on a double trap
+  in M-mode and enables the signaling the critical error to the platform.
 
 * Sddbltrp: Aimed at improving error diagnosis and resolution, this extension
   supports external debugging of harts in a critical error state, resulting from
-  a double trap condition in M-mode.
+  a double trap in M-mode.
 
 In addition to these, a non-ISA extension to the RISC-V Debug specification 1.0
 is defined. This extension is intended for external debugging of harts in a
-critical error state due to a double trap condition in M-mode and serves as a
-complement to the Ssdbltrp ISA extension.
+critical error state due to a double trap in M-mode and serves as a complement
+to the Ssdbltrp ISA extension.
 
 === Ssdbltrp and Smdbltrp Operational Details
 
@@ -131,7 +129,7 @@ implementation behaves as though Ssdbltrp is not implemented for VS-mode and the
 When a trap is to be taken into privilege mode `x`, if the `__x__DT` bit is
 currently 0, it is then set to 1, and the trap is delivered as expected. However,
 if `__x__DT` is already set to 1, a critical error condition occurs. Additionally,
-when the Smrnmi extension cite:[SMRNMI] is implemented, encountering an exception
+when the Smrnmi extension is implemented, encountering an exception
 while executing in M-mode with the `mnstatus.NMIE` bit clear similarly results in
 a critical error condition. The trap that caused the critical error condition is
 henceforth called the initial trap.
@@ -168,11 +166,11 @@ the GPA is considered benign because, if required, it can still be obtained
 -- albeit with added effort -- by software through the process of walking the page
 tables.
 
-For a double trap to M-mode that originates due to a double trap condition
-detected in VS-mode, the M-mode should delegate the double trap exception to
-HS-mode. This is accomplished by copying the values of the M-mode CSRs updated
-by the double trap to the corresponding HS-mode CSRs and using a `MRET` to
-resume execution at HS-mode at the address held in `stvec`.
+For a double trap to M-mode that originates due to a critical error detected in
+VS-mode, the M-mode should delegate the double trap exception to HS-mode. This is
+accomplished by copying the values of the M-mode CSRs updated by the double trap
+to the corresponding HS-mode CSRs and using a `MRET` to resume execution at
+HS-mode at the address held in `stvec`.
 
 Supervisor Software Events (SSE) cite:[SSE], an extension to the SBI, provide a
 mechanism for supervisor software to register and service system events
@@ -181,12 +179,14 @@ events, which hold higher priority, are processed even when the OS is in a
 critical section with interrupts disabled, thus being orthogonal to normal OS
 operations. The primary use case for SSE is in situations where event handling
 cannot afford the delay caused by interrupt masking in critical sections in the
-OS. For instance, in the event of a double trap condition, HS-mode and M-mode
-can utilize the SSE mechanism to invoke a critical-error handler in VS-mode or
-S/HS-mode, respectively. Additionally, the implementation of an SSE protocol can
-be considered as an optional measure to aid in the recovery from double trap
-conditions.
+OS. For instance, in the event of a double trap, HS-mode and M-mode can utilize
+the SSE mechanism to invoke a critical-error handler in VS-mode or S/HS-mode,
+respectively. Additionally, the implementation of an SSE protocol can be
+considered as an optional measure to aid in the recovery from such critical
+errors.
 ====
+
+<<<
 
 * In M-mode, when the Smrnmi extension is implemented and `mnstatus.NMIE` is 1,
   the hart invokes the RNMI handler as follows:
@@ -201,12 +201,11 @@ conditions.
 [NOTE]
 ====
 The consequence of this specification is that while the RNMI handler is invoked
-to notify the occurrence of a double trap condition in M-mode, the RNMI handler
-is not provided with any information about the initial trap that triggered the
-double trap condition. A double trap generally represents an irrecoverable
-condition. Invoking the RNMI handler enables performing actions such as
-capturing crash dumps and preparing the system to shutdown and/or restart in a
-controlled manner.
+to notify the occurrence of a double trap in M-mode, the RNMI handler is not
+provided with any information about the initial trap that triggered the double
+trap. A double trap generally represents an irrecoverable condition. Invoking
+the RNMI handler enables performing actions such as capturing crash dumps and
+preparing the system to shutdown and/or restart in a controlled manner.
 ====
 
 * In M-mode, when the Smrnmi extension is implemented and `mnstatus.NMIE` is 0,
@@ -227,7 +226,7 @@ An `__x__RET` instruction sets the `__x__DT` bit to 0.
 [NOTE]
 ====
 Resetting of the `__x__DT` by an `__x__RET` enables the trap handler to detect
-double trap conditions during the tail phase, where it restores critical state
+double trap occuring during the tail phase, where it restores critical state
 in preparation for resuming execution after the trap.
 ====
 
@@ -267,7 +266,7 @@ The `scerr` control enables an external debugger to disable the actions that a
 platform would normally perform when a hart asserts its `critical-error` signal.
 This allows the external debugger to enter Debug Mode, by issuing a halt
 request, in a hart that is in critical-error state and investigate the cause of
-a double trap condition.
+a double trap.
 
 The `anycerr` status bit enables an external debugger to determine if any of the
 harts associated with the DM are in a critical-error state.
