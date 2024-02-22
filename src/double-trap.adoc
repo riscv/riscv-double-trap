@@ -159,34 +159,27 @@ privilege mode:
 The consequence of this specification is that if a critical error condition was
 caused by a guest page-fault, then the GPA will not be available in `mtval2`
 when the double trap is delivered to M-mode.  This condition arises if the
-HS-mode uses the hypervisor load/store instructions when `sstatus.SDT` is 1 and
-the instruction raises a guest page-fault. The use of a hypervisor load/store
-instruction in this phase of trap handling is not common. However, not recording
-the GPA is considered benign because, if required, it can still be obtained
--- albeit with added effort -- by software through the process of walking the page
-tables.
+HS-mode invokes a hypervisor virtual-machine load or store instruction when
+`sstatus.SDT` is 1 and the instruction raises a guest page-fault. The use of a
+hypervisor virtual-machine load or store instruction in this phase of trap
+handling is not common. However, not recording the GPA is considered benign
+because, if required, it can still be obtained -- albeit with added effort --
+by software through the process of walking the page tables.
 
 For a double trap to M-mode that originates due to a critical error detected in
-VS-mode, the M-mode should delegate the double trap exception to HS-mode. This is
-accomplished by copying the values of the M-mode CSRs updated by the double trap
-to the corresponding HS-mode CSRs and using a `MRET` to resume execution at
+VS-mode, the M-mode should redirect the double trap exception to HS-mode. This
+is accomplished by copying the values of the M-mode CSRs updated by the double
+trap to the corresponding HS-mode CSRs and using a `MRET` to resume execution at
 HS-mode at the address held in `stvec`.
 
 Supervisor Software Events (SSE) cite:[SSE], an extension to the SBI, provide a
 mechanism for supervisor software to register and service system events
-emanating from an SBI Implementation, such as firmware or a hypervisor. These
-events, which hold higher priority, are processed even when the OS is in a
-critical section with interrupts disabled, thus being orthogonal to normal OS
-operations. The primary use case for SSE is in situations where event handling
-cannot afford the delay caused by interrupt masking in critical sections in the
-OS. For instance, in the event of a double trap, HS-mode and M-mode can utilize
-the SSE mechanism to invoke a critical-error handler in VS-mode or S/HS-mode,
-respectively. Additionally, the implementation of an SSE protocol can be
-considered as an optional measure to aid in the recovery from such critical
-errors.
+emanating from an SBI implementation, such as firmware or a hypervisor. In the
+event of a double trap, HS-mode and M-mode can utilize the SSE mechanism to
+invoke a critical-error handler in VS-mode or S/HS-mode, respectively.
+Additionally, the implementation of an SSE protocol can be considered as an
+optional measure to aid in the recovery from such critical errors.
 ====
-
-<<<
 
 * In M-mode, when the Smrnmi extension is implemented and `mnstatus.NMIE` is 1,
   the hart invokes the RNMI handler as follows:
