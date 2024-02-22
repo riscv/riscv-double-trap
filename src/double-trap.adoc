@@ -114,58 +114,62 @@ complement to the Ssdbltrp ISA extension.
 === Ssdbltrp and Smdbltrp Operational Details
 
 The Smdbltrp extension introduces an M-mode-disable-trap (`MDT`) field (bit 24)
-to the `mstatus` CSR. Upon reset, the `MDT` field is set to 1. The Smdbltrap
-extension introduces a new Exception Code (value = 0x16)  called the double
-trap. The bit 16 of the `medeleg` CSR is read-only zero.
+to the `mstatus` CSR. Upon reset, the `MDT` field is set to 1. The Smdbltrp
+extension introduces a new Exception Code (value = 0x10)  called the double
+trap.
 
 The Ssdbltrp adds an S-mode-disable-trap (`SDT`) field (bit 23) to the `mstatus`
 CSR and a double-trap-enable (`DTE`) field (bit 60) to the `menvcfg` CSR. If the
 H-extension is implemented, Ssdbltrp also adds a `SDT` field (bit 23) to the
-`vsstatus` CSR and a `DTE` field (bit 59) to the `henvcfg` CSR. When
-`menvcfg.DTE` is zero, the implementation behaves as though Ssdbltrp is not
+`vsstatus` CSR and a `DTE` field (bit 59) to the `henvcfg` CSR.
+
+When `menvcfg.DTE` is zero, the implementation behaves as though Ssdbltrp is not
 implemented. When Ssdbltrp is not implemented `mstatus.SDT`, `vsstatus.SDT`, and
 `henvcfg.DTE` bits are read-only zero. When `henvcfg.DTE` is zero, the
 implementation behaves as though Ssdbltrp is not implemented for VS-mode and the
-`vsstatus.SDT` bit is read-only zero. The bit 16 of the `hedeleg` CSR is
-read-only zero.
+`vsstatus.SDT` bit is read-only zero.
+
+The bit 16 of the `medeleg` and the `hedeleg` CSR are read-only zero.
 
 When a trap is to be taken into privilege mode `x`, if the `__x__DT` bit is
 currently 0, it is then set to 1, and the trap is delivered as expected. However,
-if `__x__DT` is already set to 1, a double trap condition occurs. Additionally,
-when the Smrnmi extension is implemented, encountering an exception while
-executing in M-mode with the `mnstatus.NMIE` bit clear similarly results in a
-double trap condition.
+if `__x__DT` is already set to 1, a critical error condition occurs. Additionally,
+when the Smrnmi extension cite:[SMRNMI] is implemented, encountering an exception
+while executing in M-mode with the `mnstatus.NMIE` bit clear similarly results in
+a critical error condition. The trap that caused the critical error condition is
+henceforth called the initial trap.
 
 [NOTE]
 ====
-The trap handler should clear the `__x__DT` bit only after it has saved the
-state, including `__x__cause`, `__x__epc`, and `__x__tval` among others, needed
-to resume from the trap, and the trap handler is reentrant.
+A trap handler should clear the `__x__DT` bit only after it has saved the state,
+including `__x__cause`, `__x__epc`, and `__x__tval` among others, needed to
+resume from the trap, and the trap handler is reentrant.
 ====
 
-In the event of a double trap condition, the handling varies based on the
+In the event of a critical error condition, the handling varies based on the
 privilege mode:
 
-* At privilege mode less than M: The hart delivers a double trap exception to
-  M-mode using the following process:
+* At privilege mode less than M: The hart raises a double trap exception and
+  a trap is taken into M-mode as follows:
 
   ** The hart writes registers, except `mcause` and `mtval2`, with the same
-     information that the initial trap would have provided if it was not
-     delegated by M-mode. The `mtval2` register is set to what would be
-     otherwise reported in `mcause` register by the initial trap if it was not
-     delegated by M-mode. The Exception Code in the `mcause` register is set to
-     16, the double trap exception code, and its Interrupt field is set to 0.
+     information that the initial trap would have written if it was taken into
+     M-mode. The `mtval2` register is then set to what would be otherwise
+     written into the `mcause` register by the initial trap. The Exception Code
+     in the `mcause` register is set to 16, the double trap exception code, and
+     its Interrupt field is set to 0.
 
 [NOTE]
 ====
-The consequence of this specification is that if a guest page-fault that is 
-delegated to HS-mode triggered the double trap condition in HS-mode then the GPA
-will not be available in `mtval2` when the double trap is delivered to M-mode.
-This condition arises if the HS-mode uses the hypervisor load/store instructions
-when `sstatus.SDT` is 1 and the instruction raises a guest page-fault. The use
-of a hypervisor load/store instruction in this phase of trap handling is not
-common. However, not recording the GPA is benign as the it can also be
-discovered if required, with added effort, by software walking the page tables.
+The consequence of this specification is that if a critical error condition was
+caused by a guest page-fault, then the GPA will not be available in `mtval2`
+when the double trap is delivered to M-mode.  This condition arises if the
+HS-mode uses the hypervisor load/store instructions when `sstatus.SDT` is 1 and
+the instruction raises a guest page-fault. The use of a hypervisor load/store
+instruction in this phase of trap handling is not common. However, not recording
+the GPA is considered benign because, if required, it can still be obtained
+--albeit with added effort-- by software through the process of walking the page
+tables.
 
 For a double trap to M-mode that originates due to a double trap condition
 detected in VS-mode, the M-mode should delegate the double trap exception to
@@ -190,12 +194,12 @@ conditions.
 * In M-mode, when the Smrnmi extension is implemented and `mnstatus.NMIE` is 1,
   the hart invokes the RNMI handler as follows:
 
-  ** The `mnepc` register is updated with the value that the initial trap would
-     have written to `mepc`. The `mnstatus` privilege mode information is
-     written to indicate M-mode and the `mnstatus.NMIE` field is cleared. No
-     other registers are written. The Exception Code in the `mncause` register
-     is set to 16, the double trap exception code, and its Interrupt field is
-     set to 0.
+  ** The `mnepc` register is written with the value that the initial trap would
+     have written to the `mepc` register. The privilege mode information fields
+     in the `mnstatus` register are written to indicate M-mode and its `NMIE`
+     field is set to 0. No other registers are written. The Exception Code in
+     the `mncause` register is set to 16, the double trap exception code, and
+     its Interrupt field is set to 0.
 
 [NOTE]
 ====
@@ -209,25 +213,23 @@ controlled manner.
 ====
 
 * In M-mode, when the Smrnmi extension is implemented and `mnstatus.NMIE` is 0,
-  or if the Smrnmi extension is not implememted:
-
-  ** The hart enters a critical-error state without updating any architectural
-     state. This state involves ceasing execution, disabling all interrupts
-     (including NMIs), and asserting a `critical-error` signal to the platform.
+  or if the Smrnmi extension is not implemented, the hart enters a critical-error
+  state without updating any architectural state. This state involves ceasing
+  execution, disabling all interrupts (including NMIs), and asserting a
+  `critical-error` signal to the platform.
 
 [NOTE]
 ====
-The actions performed by the platorm on assertion of a `critical-error` signal
-by a hart are platorm specific. The range of possible actions include restarting
+The actions performed by the platform on assertion of a `critical-error` signal
+by a hart are platform specific. The range of possible actions include restarting
 the affected hart or restarting the entire platform among others.
 ====
 
-An `__x__RET` instruction, sets the `__x__DT` bit to 0.
+An `__x__RET` instruction sets the `__x__DT` bit to 0.
 
 [NOTE]
 ====
-
-An `__x__RET` clearing the `__x__DT` bit enables the trap handler to detect
+Resetting of the `__x__DT` by an `__x__RET` enables the trap handler to detect
 double trap conditions during the tail phase, where it restores critical state
 in preparation for resuming execution after the trap.
 ====
@@ -239,26 +241,28 @@ in preparation for resuming execution after the trap.
 The Sddbltrp extension introduces a read-only previous-critical-error (`pcerr`)
 field (bit 19) to the `dcsr` CSR.
 
-If Sddbltrp is not implemented a hart that is in critical-error state does not
+If Sddbltrp is not implemented, a hart that is in critical-error state does not
 enter Debug Mode when requested by a halt request from the Debug Module.
 
 If Sddbltrp is implemented, a hart in critical-error state enters Debug Mode
-with the `pcerr` bit in `dcsr` set to 1 and the 
-upon receiving a halt request from the
+with the `pcerr` bit in `dcsr` set to 1 upon receiving a halt request from the
 Debug Module. Resuming from Debug Mode with `pcerr` is 1, returns the hart to
 the critical-error state.
 
 === Non-ISA Debug Module (DM) Extension
 
 The RISC-V Debug 1.0 specification is extended with a new optional control bit
-supress-critical-error-signal (`scerr`), defined in the `dmcs2` register
-(bit 12) of the DM, to manage `critical-error` signal. When `scerr` is set to
-1, the `critical-error` signal asserted by any hart associated with that DM is
-masked. A new read-only field (bit 25) any-hart-in-critical-error (`anycerr`)
-is defined in the `dmstatus` register of the DM. This bit is 1 if any of the
-harts associated with the DM, irrespective of the value held in `hartsel`, 
-assert their `critical-error` signal, before any masking of the request by
-`scerr`.
+suppress-critical-error-signal (`scerr`), defined in the `dmcs2` register
+(bit 12) of the DM, to manage `critical-error` signal. 
+
+When `scerr` is set to 1, the `critical-error` signal asserted by any hart
+associated with that DM is masked and prevented from causing its normal
+platform specified action.
+
+A new read-only field (bit 25) any-hart-in-critical-error (`anycerr`)
+is defined in the `dmstatus` register of the DM. This bit is 1 if any hart
+associated with the DM, irrespective of the value held in `hartsel`, asserts its
+`critical-error` signal, before any masking of the request by `scerr`.
 
 [NOTE]
 ====
@@ -269,7 +273,7 @@ request, in a hart that is in critical-error state and investigate the cause of
 a double trap condition.
 
 The `anycerr` status bit enables an external debugger to determine if any of the
-hart associated with the DM are in a critical-error state.
+harts associated with the DM are in a critical-error state.
 ====
 
 [bibliography]
