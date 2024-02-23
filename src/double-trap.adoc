@@ -166,14 +166,6 @@ For a double trap to M-mode originating from a critical error in VS-mode, M-mode
 should redirect the exception to HS-mode by copying the values of M-mode CSRs
 updated by the double trap to corresponding HS-mode CSRs and should use an `MRET`
 to resume execution in HS-mode at the address in `stvec`.
-
-Supervisor Software Events (SSE) cite:[SSE], an extension to the SBI, provide a
-mechanism for supervisor software to register and service system events
-emanating from an SBI implementation, such as firmware or a hypervisor. In the
-event of a double trap, HS-mode and M-mode can utilize the SSE mechanism to
-invoke a critical-error handler in VS-mode or S/HS-mode, respectively.
-Additionally, the implementation of an SSE protocol can be considered as an
-optional measure to aid in the recovery from such critical errors.
 ====
 
 * In M-mode, when the Smrnmi extension is implemented and `mnstatus.NMIE` is 1,
@@ -184,6 +176,16 @@ optional measure to aid in the recovery from such critical errors.
      fields in the `mnstatus` register are written to indicate M-mode and its
      `NMIE` field is set to 0. No other registers are written. The `mncause`
      register is set to 16, the double trap exception code.
+
+[NOTE]
+====
+The consequence of this specification is that while the RNMI handler is invoked
+to notify the occurrence of a double trap in M-mode, the RNMI handler is not
+provided with any information about the unexpected trap that triggered the double
+trap. A double trap generally represents an irrecoverable condition. Invoking
+the RNMI handler enables performing actions such as capturing crash dumps and
+preparing the system to shutdown and/or restart in a controlled manner.
+====
 
 * In M-mode, when the Smrnmi extension is implemented and `mnstatus.NMIE` is 0,
   or if the Smrnmi extension is not implemented, the hart enters a critical-error
@@ -196,13 +198,6 @@ optional measure to aid in the recovery from such critical errors.
 The actions performed by the platform on assertion of a `critical-error` signal
 by a hart are platform specific. The range of possible actions include restarting
 the affected hart or restarting the entire platform among others.
-
-The consequence of this specification is that while the RNMI handler is invoked
-to notify the occurrence of a double trap in M-mode, the RNMI handler is not
-provided with any information about the unexpected trap that triggered the double
-trap. A double trap generally represents an irrecoverable condition. Invoking
-the RNMI handler enables performing actions such as capturing crash dumps and
-preparing the system to shutdown and/or restart in a controlled manner.
 ====
 
 An `__x__RET` instruction sets the `__x__DT` bit to 0.
@@ -212,6 +207,17 @@ An `__x__RET` instruction sets the `__x__DT` bit to 0.
 Resetting of the `__x__DT` by an `__x__RET` enables the trap handler to detect
 double trap occuring during the tail phase, where it restores critical state
 in preparation for resuming execution after the trap.
+====
+
+[NOTE]
+====
+Supervisor Software Events (SSE) cite:[SSE], an extension to the SBI, provide a
+mechanism for supervisor software to register and service system events
+emanating from an SBI implementation, such as firmware or a hypervisor. In the
+event of a double trap, HS-mode and M-mode can utilize the SSE mechanism to
+invoke a critical-error handler in VS-mode or S/HS-mode, respectively.
+Additionally, the implementation of an SSE protocol can be considered as an
+optional measure to aid in the recovery from such critical errors.
 ====
 
 <<<
