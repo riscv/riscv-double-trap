@@ -193,16 +193,16 @@ optional measure to aid in the recovery from such critical errors.
 
 [NOTE]
 ====
+The actions performed by the platform on assertion of a `critical-error` signal
+by a hart are platform specific. The range of possible actions include restarting
+the affected hart or restarting the entire platform among others.
+
 The consequence of this specification is that while the RNMI handler is invoked
 to notify the occurrence of a double trap in M-mode, the RNMI handler is not
 provided with any information about the unexpected trap that triggered the double
 trap. A double trap generally represents an irrecoverable condition. Invoking
 the RNMI handler enables performing actions such as capturing crash dumps and
 preparing the system to shutdown and/or restart in a controlled manner.
-
-The actions performed by the platform on assertion of a `critical-error` signal
-by a hart are platform specific. The range of possible actions include restarting
-the affected hart or restarting the entire platform among others.
 ====
 
 An `__x__RET` instruction sets the `__x__DT` bit to 0.
