@@ -110,13 +110,14 @@ due to a double trap in M-mode, serving as a complement to the Ssdbltrp extensio
 
 The Smdbltrp extension introduces an M-mode-disable-trap (`MDT`) field (bit 38)
 to the `mstatus` CSR for RV64. For RV32 this field is located in the `mstatush`
-CSR at bit position 7. Upon reset, the `MDT` field is set to 1. The Smdbltrp
-extension introduces a new Exception Code (value = 0x10)  called the double
-trap. The Ssdbltrp adds an S-mode-disable-trap (`SDT`) field (bit 23) to the
-`mstatus` CSR and a double-trap-enable (`DTE`) field (bit 60) to the `menvcfg`
-CSR. If the H-extension is implemented, Ssdbltrp also adds a `SDT` field
-(bit 23) to the `vsstatus` CSR and a `DTE` field (bit 59) to the `henvcfg` CSR.
-The bit 16 of the `medeleg` and the `hedeleg` CSR are read-only zero.
+CSR at bit position 7. Upon reset, the `MDT` field is set to 1. The Ssdbltrp 
+adds an S-mode-disable-trap (`SDT`) field (bit 23) to the `mstatus` CSR and a
+double-trap-enable (`DTE`) field (bit 60) to the `menvcfg` CSR. If the
+H-extension is implemented, Ssdbltrp also adds a `SDT` field (bit 23) to the
+`vsstatus` CSR and a `DTE` field (bit 59) to the `henvcfg` CSR. If either of
+these extensions is implemented, a new Exception Code (value = 16) called the
+double trap is introduced. The bit 16 of the `medeleg` and the `hedeleg` CSRs
+are read-only zero.
 
 When `menvcfg.DTE` is zero, the implementation behaves as though Ssdbltrp is not
 implemented. When Ssdbltrp is not implemented `mstatus.SDT`, `vsstatus.SDT`, and
@@ -225,12 +226,14 @@ The Sddbltrp extension introduces a read-only previous-critical-error (`pcerr`)
 field (bit 19) to the `dcsr` CSR.
 
 If Sddbltrp is not implemented, a hart that is in critical error state does not
-enter Debug Mode when requested by a halt request from the Debug Module.
+enter Debug Mode when requested by a halt request from the Debug Module (DM).
 
 If Sddbltrp is implemented, a hart in critical error state enters Debug Mode
-with the `pcerr` bit in `dcsr` set to 1 upon receiving a halt request from the
-Debug Module. Resuming from Debug Mode with `pcerr` is 1, returns the hart to
-the critical error state.
+upon a halt request from the DM. Upon this transition to Debug Mode, the `pcerr`
+field of `dcsr` is set to 1, and `dpc` set to the `pc` at which the interrupt or
+the exception causing the unexpected trap occurred. Resuming from Debug Mode
+with `pcerr` is 1 returns the hart to the critical error state, and the `pc`
+following this resume UNSPECIFIED.
 
 === Non-ISA Debug Module (DM) Extension
 
@@ -242,6 +245,14 @@ When `scerr` is set to 1, the `critical-error` signal asserted by any hart
 associated with that DM is masked and prevented from causing its normal
 platform specified action.
 
+[NOTE]
+====
+The `scerr` control enables an external debugger to disable the actions that a
+platform would normally perform when a hart asserts its `critical-error` signal.
+This allows the external debugger to enter Debug Mode in a hart that is in
+critical error state and investigate the cause of a double trap.
+====
+
 A new read-only field (bit 25) any-hart-in-critical-error (`anycerr`)
 is defined in the `dmstatus` register of the DM. This bit is 1 if any hart
 associated with the DM, irrespective of the value held in `hartsel`, asserts its
@@ -249,12 +260,6 @@ associated with the DM, irrespective of the value held in `hartsel`, asserts its
 
 [NOTE]
 ====
-The `scerr` control enables an external debugger to disable the actions that a
-platform would normally perform when a hart asserts its `critical-error` signal.
-This allows the external debugger to enter Debug Mode, by issuing a halt
-request, in a hart that is in critical error state and investigate the cause of
-a double trap.
-
 The `anycerr` status bit enables an external debugger to determine if any of the
 harts associated with the DM are in a critical error state.
 ====
