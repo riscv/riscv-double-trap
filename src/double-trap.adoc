@@ -134,9 +134,9 @@ henceforth called the unexpected trap.
 
 [NOTE]
 ====
-A trap handler after saving the state necessary for resuming from the trap,
-including `__x__cause`, `__x__epc`, and `__x__tval` among others, should clear the
-`__x__DT` bit when it becomes reentrant.
+A trap handler after saving the state needed for resuming from the trap, including
+`__x__cause`, `__x__epc`, and `__x__tval` among others, should clear the `__x__DT`
+bit when it is reentrant.
 ====
 
 In the event of a critical error condition, the handling varies based on the
@@ -160,8 +160,7 @@ HS-mode invokes a hypervisor virtual-machine load or store instruction when
 `SDT` is 1 and the instruction raises a guest page-fault. The use of such an
 instruction in this phase of trap handling is not common. However, not recording
 the GPA is considered benign because, if required, it can still be obtained
--- albeit with added effort -- by software through the process of walking the
-page tables.
+-- albeit with added effort -- through the process of walking the page tables.
 
 For a double trap to M-mode originating from a critical error in VS-mode, M-mode
 should redirect the exception to HS-mode by copying the values of M-mode CSRs
