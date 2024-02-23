@@ -65,17 +65,17 @@ Hauser, and Ved Shanbhogue
 == Double Trap
 
 A double trap typically arises during a sensitive phase in trap handling
-operations - when an exception or interrupt occurs while the trap handler, the
-component responsible for managing these events, is in a non-reentrant state.
-This non-reentrancy usually occurs in the early phase of trap handling, where
-the trap handler hasn't yet preserved the necessary state to handle and resume
+operations -- when an exception or interrupt occurs while the trap handler (the
+component responsible for managing these events) is in a non-reentrant state.
+This non-reentrancy usually occurs in the early phase of trap handling, wherein
+the trap handler has not yet preserved the necessary state to handle and resume
 from the trap. The occurrence of a second trap during this phase can lead to an
-overwrite of this critical state information, resulting in the loss of data
-needed to recover from the initial trap. Trap handlers are designed to neither
-enable interrupts nor cause exceptions during this phase of handling. However,
-managing Hardware-Error exceptions, which may occur unpredictably, presents a
-significant challenge in trap handler implementation due to the potential risk of
-a double trap triggered by such a Hardware-Error exception cite:[PRIV].
+overwrite of critical state information, resulting in the loss of data needed to
+recover from the initial trap. Trap handlers are designed to neither enable
+interrupts nor cause exceptions during this phase of handling. However, managing
+Hardware-Error exceptions cite:[PRIV], which may occur unpredictably, presents
+significant challenges in trap handler implementation due to the potential risk
+of a double trap triggered by such an exception
 
 Efficient and reliable fault handling is essential for ensuring robust
 operation. The ISA Double Trap Extensions is devised to tackle situations where
@@ -112,7 +112,7 @@ to the Ssdbltrp ISA extension.
 === Ssdbltrp and Smdbltrp Operational Details
 
 The Smdbltrp extension introduces an M-mode-disable-trap (`MDT`) field (bit 38)
-to the `mstatus` CSR for RV64. For RV32 this bit is located in the `mstatush`
+to the `mstatus` CSR for RV64. For RV32 this field is located in the `mstatush`
 CSR at bit position 7. Upon reset, the `MDT` field is set to 1. The Smdbltrp
 extension introduces a new Exception Code (value = 0x10)  called the double
 trap. The Ssdbltrp adds an S-mode-disable-trap (`SDT`) field (bit 23) to the
@@ -137,7 +137,7 @@ henceforth called the unexpected trap.
 
 [NOTE]
 ====
-A trap handler should clear the `__x__DT` bit only after it has saved the state,
+A trap handler should clear the `__x__DT` bit after it has saved the state,
 including `__x__cause`, `__x__epc`, and `__x__tval` among others, needed to
 resume from the trap, and the trap handler is reentrant.
 ====
