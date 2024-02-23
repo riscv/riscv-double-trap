@@ -110,7 +110,7 @@ due to a double trap in M-mode, serving as a complement to the Ssdbltrp extensio
 
 The Smdbltrp extension introduces an M-mode-disable-trap (`MDT`) field (bit 38)
 to the `mstatus` CSR for RV64. For RV32 this field is located in the `mstatush`
-CSR at bit position 7. Upon reset, the `MDT` field is set to 1. The Ssdbltrp 
+CSR at bit position 6. Upon reset, the `MDT` field is set to 1. The Ssdbltrp 
 adds an S-mode-disable-trap (`SDT`) field (bit 23) to the `mstatus` CSR and a
 double-trap-enable (`DTE`) field (bit 60) to the `menvcfg` CSR. If the
 H-extension is implemented, Ssdbltrp also adds a `SDT` field (bit 23) to the
