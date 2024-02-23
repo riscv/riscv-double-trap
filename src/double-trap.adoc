@@ -162,10 +162,9 @@ instruction in this phase of trap handling is not common. However, not recording
 the GPA is considered benign because, if required, it can still be obtained
 -- albeit with added effort -- through the process of walking the page tables.
 
-For a double trap to M-mode originating from a critical error in VS-mode, M-mode
-should redirect the exception to HS-mode by copying the values of M-mode CSRs
-updated by the double trap to corresponding HS-mode CSRs and should use an `MRET`
-to resume execution in HS-mode at the address in `stvec`.
+For a double trap originating in VS-mode, M-mode should redirect the exception
+to HS-mode by copying the values of M-mode CSRs updated by the trap to HS-mode
+CSRs and should use an `MRET` to resume execution at the address in `stvec`.
 ====
 
 * In M-mode, when the Smrnmi extension is implemented and `mnstatus.NMIE` is 1,
