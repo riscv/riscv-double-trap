@@ -189,9 +189,9 @@ preparing the system to shutdown and/or restart in a controlled manner.
 
 * In M-mode, when the Smrnmi extension is implemented and `mnstatus.NMIE` is 0,
   or if the Smrnmi extension is not implemented, the hart enters a critical-error
-  state without updating any architectural state. This state involves ceasing
-  execution, disabling all interrupts (including NMIs), and asserting a
-  `critical-error` signal to the platform.
+  state without updating any architectural state including the `pc`. This state
+  involves ceasing execution, disabling all interrupts (including NMIs), and
+  asserting a `critical-error` signal to the platform.
 
 [NOTE]
 ====
@@ -220,6 +220,10 @@ Additionally, the implementation of an SSE protocol can be considered as an
 optional measure to aid in the recovery from such critical errors.
 ====
 
+If the hypervisor extension is not implemented, then the Ssdbltrap extension
+requires the implementation of the `mtval2` CSR, which is added by the
+hypervisor extension.
+
 === Sddbltrp Operational Details
 
 The Sddbltrp extension introduces a read-only previous-critical-error (`pcerr`)
@@ -230,10 +234,8 @@ enter Debug Mode when requested by a halt request from the Debug Module (DM).
 
 If Sddbltrp is implemented, a hart in critical error state enters Debug Mode
 upon a halt request from the DM. Upon this transition to Debug Mode, the `pcerr`
-field of `dcsr` is set to 1, and `dpc` set to the `pc` at which the interrupt or
-the exception causing the unexpected trap occurred. Resuming from Debug Mode
-with `pcerr` is 1 returns the hart to the critical error state, and the `pc`
-following this resume UNSPECIFIED.
+field of `dcsr` is set to 1, and `dpc` set to the `pc`. Resuming from Debug Mode
+with `pcerr` is 1 returns the hart to the critical error state.
 
 === Non-ISA Debug Module (DM) Extension
 
