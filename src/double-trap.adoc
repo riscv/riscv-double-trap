@@ -220,6 +220,10 @@ Additionally, the implementation of an SSE protocol can be considered as an
 optional measure to aid in the recovery from such critical errors.
 ====
 
+If the hypervisor extension is not implemented, then the Ssdbltrap extension
+requires the implementation of the `mtval2` CSR, which is added by the
+hypervisor extension.
+
 === Sddbltrp Operational Details
 
 The Sddbltrp extension introduces a read-only previous-critical-error (`pcerr`)
