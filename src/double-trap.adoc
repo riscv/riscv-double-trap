@@ -207,7 +207,7 @@ The consequence of this specification is that on occurrence of double trap the
 RNMI handler is not provided with information that a trap would report in the
 `mtval` and the `mtval2` registers. This information, if needed, may be obtained
 by the RNMI handler by decoding the instruction at the address in `mepc` and
-examining its source register values.
+examining its source register contents.
 ====
 
 * In M-mode, when the Smrnmi extension is implemented and `mnstatus.NMIE` is 0,
