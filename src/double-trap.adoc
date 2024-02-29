@@ -108,16 +108,16 @@ due to a double trap in M-mode, serving as a complement to the Ssdbltrp extensio
 
 === Ssdbltrp and Smdbltrp Operational Details
 
-The Smdbltrp extension introduces an M-mode-disable-trap (`MDT`) field (bit 38)
+The Smdbltrp extension introduces an M-mode-disable-trap (`MDT`) field (bit 45)
 to the `mstatus` CSR for RV64. For RV32 this field is located in the `mstatush`
-CSR at bit position 6. Upon reset, the `MDT` field is set to 1. The Ssdbltrp 
-adds an S-mode-disable-trap (`SDT`) field (bit 23) to the `mstatus` CSR and a
-double-trap-enable (`DTE`) field (bit 60) to the `menvcfg` CSR. If the
-H-extension is implemented, Ssdbltrp also adds a `SDT` field (bit 23) to the
+CSR at bit position 13. Upon reset, the `MDT` field is set to 1. The Ssdbltrp 
+adds an S-mode-disable-trap (`SDT`) field (bit 24) to the `mstatus` CSR and a
+double-trap-enable (`DTE`) field (bit 59) to the `menvcfg` CSR. If the
+H-extension is implemented, Ssdbltrp also adds a `SDT` field (bit 24) to the
 `vsstatus` CSR and a `DTE` field (bit 59) to the `henvcfg` CSR. If either of
 these extensions is implemented, a new Exception Code (value = 16) called the
 double trap is introduced. The bit 16 of the `medeleg` and the `hedeleg` CSRs
-are read-only zero.
+are read-only zero as the double trap is not delegatable.
 
 When `menvcfg.DTE` is zero, the implementation behaves as though Ssdbltrp is not
 implemented. When Ssdbltrp is not implemented `mstatus.SDT`, `vsstatus.SDT`, and
@@ -125,19 +125,36 @@ implemented. When Ssdbltrp is not implemented `mstatus.SDT`, `vsstatus.SDT`, and
 implementation behaves as though Ssdbltrp is not implemented for VS-mode and the
 `vsstatus.SDT` bit is read-only zero.
 
+While the `SDT` bit is 1, the `SIE` bit is read-only zero. When the `SDT` bit is
+cleared, `SIE` bit assumes the value written to it. While the `MDT` bit is 1,
+the MIE` bit is read-only zero. When `MDT` bit is cleared, the `MIE` bit remains
+zero in RV32, and assumes the value written to it in RV64.
+
 When a trap is to be taken into privilege mode `x`, if the `__x__DT` bit is
 currently 0, it is then set to 1, and the trap is delivered as expected. However,
 if `__x__DT` is already set to 1, a critical error condition occurs. Additionally,
-when the Smrnmi extension is implemented, encountering an exception
-while executing in M-mode with the `mnstatus.NMIE` bit clear similarly results in
-a critical error condition. The trap that caused the critical error condition is
-henceforth called the unexpected trap.
+when the Smrnmi extension is implemented, encountering an exception while
+executing in M-mode with the `mnstatus.NMIE` set to 0 similarly results in a
+critical error condition. The trap that caused the critical error condition is
+henceforth called the _unexpected trap_.
+
+An `__x__RET` instruction sets the `__x__DT` bit to 0.
 
 [NOTE]
 ====
 A trap handler after saving the state needed for resuming from the trap, including
 `__x__cause`, `__x__epc`, and `__x__tval` among others, should clear the `__x__DT`
 bit when it is reentrant.
+
+When a trap is taken to privilege mode `x`, the `__x__IE` bit is set to 0, and
+concurrently, the `__x__DT` bit is set to 1. This action disables all maskable
+interrupts at privilege level `x`. Interrupts may be re-enabled by setting the
+`__x__IE` bit to 1, which can be done either simultaneously with the clearing of
+the `__x__DT` bit or subsequent to the clearing of the `__x__DT` bit.
+
+Resetting of the `__x__DT` by an `__x__RET` enables the trap handler to detect
+double trap occuring during the tail phase, where it restores critical state in
+preparation for resuming execution after the trap.
 ====
 
 In the event of a critical error condition, the handling varies based on the
@@ -147,9 +164,9 @@ privilege mode:
   a trap is taken into M-mode as follows:
 
   ** The hart writes registers, except `mcause` and `mtval2`, with the same
-     information that the unexpected trap would have written if it was taken
+     information that the _unexpected trap_ would have written if it was taken
      into M-mode. The `mtval2` register is then set to what would be otherwise
-     written into the `mcause` register by the unexpected trap. The `mcause`
+     written into the `mcause` register by the _unexpected trap_. The `mcause`
      register is set to 16, the double trap exception code.
 
 [NOTE]
@@ -166,25 +183,31 @@ the GPA is considered benign because, if required, it can still be obtained
 For a double trap originating in VS-mode, M-mode should redirect the exception
 to HS-mode by copying the values of M-mode CSRs updated by the trap to HS-mode
 CSRs and should use an `MRET` to resume execution at the address in `stvec`.
+
+Supervisor Software Events (SSE) cite:[SSE], an extension to the SBI, provide a
+mechanism for supervisor software to register and service system events
+emanating from an SBI implementation, such as firmware or a hypervisor. In the
+event of a double trap, HS-mode and M-mode can utilize the SSE mechanism to
+invoke a critical-error handler in VS-mode or S/HS-mode, respectively.
+Additionally, the implementation of an SSE protocol can be considered as an
+optional measure to aid in the recovery from such critical errors.
 ====
 
 * In M-mode, when the Smrnmi extension is implemented and `mnstatus.NMIE` is 1,
   the hart invokes the RNMI handler as follows:
 
-  ** The `mnepc` register is written with the value that the unexpected trap
-     would have written to the `mepc` register. The privilege mode information
-     fields in the `mnstatus` register are written to indicate M-mode and its
-     `NMIE` field is set to 0. No other registers are written. The `mncause`
-     register is set to 16, the double trap exception code.
+  ** The `mnepc` and `mcause` registers are written with the values that the
+     _unexpected trap_ would have written to the `mepc` and `mcause` registers
+     respectively. The privilege mode information fields in the `mnstatus`
+     register are written to indicate M-mode and its `NMIE` field is set to 0.
 
 [NOTE]
 ====
-The consequence of this specification is that while the RNMI handler is invoked
-to notify the occurrence of a double trap in M-mode, the RNMI handler is not
-provided with any information about the unexpected trap that triggered the double
-trap. A double trap generally represents an irrecoverable condition. Invoking
-the RNMI handler enables performing actions such as capturing crash dumps and
-preparing the system to shutdown and/or restart in a controlled manner.
+The consequence of this specification is that on occurrence of double trap the
+RNMI handler is not provided with information that a trap would report in the
+`mtval` and the `mtval2` registers. This information, if needed, may be obtained
+by the RNMI handler by decoding the instruction at the address in `mepc` and
+examing the contents of its source registers.
 ====
 
 * In M-mode, when the Smrnmi extension is implemented and `mnstatus.NMIE` is 0,
@@ -200,29 +223,7 @@ by a hart are platform specific. The range of possible actions include restartin
 the affected hart or restarting the entire platform among others.
 ====
 
-An `__x__RET` instruction sets the `__x__DT` bit to 0.
-
-[NOTE]
-====
-Resetting of the `__x__DT` by an `__x__RET` enables the trap handler to detect
-double trap occuring during the tail phase, where it restores critical state
-in preparation for resuming execution after the trap.
-====
-
-[NOTE]
-====
-Supervisor Software Events (SSE) cite:[SSE], an extension to the SBI, provide a
-mechanism for supervisor software to register and service system events
-emanating from an SBI implementation, such as firmware or a hypervisor. In the
-event of a double trap, HS-mode and M-mode can utilize the SSE mechanism to
-invoke a critical-error handler in VS-mode or S/HS-mode, respectively.
-Additionally, the implementation of an SSE protocol can be considered as an
-optional measure to aid in the recovery from such critical errors.
-====
-
-If the hypervisor extension is not implemented, then the Ssdbltrap extension
-requires the implementation of the `mtval2` CSR, which is added by the
-hypervisor extension.
+The Ssdbltrap extension requires the implementation of the `mtval2` CSR.
 
 === Sddbltrp Operational Details
 
