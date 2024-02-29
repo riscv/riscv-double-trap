@@ -119,16 +119,16 @@ these extensions is implemented, a new Exception Code (value = 16) called the
 double trap is introduced. The bit 16 of the `medeleg` and the `hedeleg` CSRs
 are read-only zero as the double trap is not delegatable.
 
+While the `SDT` bit is 1, the `SIE` bit is read-only zero. When the `SDT` bit is
+cleared, `SIE` bit assumes the value written to it. While the `MDT` bit is 1,
+the MIE` bit is read-only zero. When `MDT` bit is cleared, the `MIE` bit remains
+zero in RV32, and assumes the value written to it in RV64.
+
 When `menvcfg.DTE` is zero, the implementation behaves as though Ssdbltrp is not
 implemented. When Ssdbltrp is not implemented `mstatus.SDT`, `vsstatus.SDT`, and
 `henvcfg.DTE` bits are read-only zero. When `henvcfg.DTE` is zero, the
 implementation behaves as though Ssdbltrp is not implemented for VS-mode and the
 `vsstatus.SDT` bit is read-only zero.
-
-While the `SDT` bit is 1, the `SIE` bit is read-only zero. When the `SDT` bit is
-cleared, `SIE` bit assumes the value written to it. While the `MDT` bit is 1,
-the MIE` bit is read-only zero. When `MDT` bit is cleared, the `MIE` bit remains
-zero in RV32, and assumes the value written to it in RV64.
 
 When a trap is to be taken into privilege mode `x`, if the `__x__DT` bit is
 currently 0, it is then set to 1, and the trap is delivered as expected. However,
@@ -207,7 +207,7 @@ The consequence of this specification is that on occurrence of double trap the
 RNMI handler is not provided with information that a trap would report in the
 `mtval` and the `mtval2` registers. This information, if needed, may be obtained
 by the RNMI handler by decoding the instruction at the address in `mepc` and
-examing the contents of its source registers.
+examining its source register values.
 ====
 
 * In M-mode, when the Smrnmi extension is implemented and `mnstatus.NMIE` is 0,
@@ -228,25 +228,21 @@ The Ssdbltrap extension requires the implementation of the `mtval2` CSR.
 === Sddbltrp Operational Details
 
 The Sddbltrp extension introduces a read-only previous-critical-error (`pcerr`)
-field (bit 19) to the `dcsr` CSR.
-
-If Sddbltrp is not implemented, a hart that is in critical error state does not
-enter Debug Mode when requested by a halt request from the Debug Module (DM).
-
-If Sddbltrp is implemented, a hart in critical error state enters Debug Mode
-upon a halt request from the DM. Upon this transition to Debug Mode, the `pcerr`
-field of `dcsr` is set to 1, and `dpc` set to the `pc`. Resuming from Debug Mode
-with `pcerr` is 1 returns the hart to the critical error state.
+field (bit 19) to the `dcsr` CSR. If Sddbltrp is not implemented, a hart that is
+in critical error state does not enter Debug Mode when requested by a halt
+request from the Debug Module (DM). If Sddbltrp is implemented, a hart in
+critical error state enters Debug Mode upon a halt request from the DM. Upon
+this transition to Debug Mode, the `pcerr` field of `dcsr` is set to 1, and
+`dpc` set to the `pc`. Resuming from Debug Mode with `pcerr` is 1 returns the
+hart to the critical error state.
 
 === Non-ISA Debug Module (DM) Extension
 
 The RISC-V Debug 1.0 specification is extended with a new optional control bit
 suppress-critical-error-signal (`scerr`), defined in the `dmcs2` register
-(bit 12) of the DM, to manage the `critical-error` signal. 
-
-When `scerr` is set to 1, the `critical-error` signal asserted by any hart
-associated with that DM is masked and prevented from causing its normal
-platform specified action.
+(bit 12) of the DM, to manage the `critical-error` signal. When `scerr` is set
+to 1, the `critical-error` signal asserted by any hart associated with that DM
+is masked and prevented from causing its normal platform specified action.
 
 [NOTE]
 ====
