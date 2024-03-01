@@ -114,15 +114,19 @@ CSR at bit position 13. Upon reset, the `MDT` field is set to 1. The Ssdbltrp
 adds an S-mode-disable-trap (`SDT`) field (bit 24) to the `mstatus` CSR and a
 double-trap-enable (`DTE`) field (bit 59) to the `menvcfg` CSR. If the
 H-extension is implemented, Ssdbltrp also adds a `SDT` field (bit 24) to the
-`vsstatus` CSR and a `DTE` field (bit 59) to the `henvcfg` CSR. If either of
-these extensions is implemented, a new Exception Code (value = 16) called the
-double trap is introduced. The bit 16 of the `medeleg` and the `hedeleg` CSRs
-are read-only zero as the double trap is not delegatable.
+`vsstatus` CSR and a `DTE` field (bit 59) to the `henvcfg` CSR.
 
-While the `SDT` bit is 1, the `SIE` bit is read-only zero. When the `SDT` bit is
-cleared, `SIE` bit assumes the value written to it. While the `MDT` bit is 1,
-the MIE` bit is read-only zero. When `MDT` bit is cleared, the `MIE` bit remains
-zero in RV32, and assumes the value written to it in RV64.
+When the `SDT` bit is set to 1, the `SIE` bit is automatically set to 0,
+regardless of the value written to the `SIE` bit. While the `SDT` bit is 1, the
+`SIE` bit is read-only zero. When the `SDT` bit is cleared, `SIE` bit assumes
+the value written to it. When the `MDT` bit is set to 1, the `MIE` bit is
+automatically set to 0, regardless of the value written to the `MIE` bit. While
+the `MDT` bit is 1, the `MIE` bit is read-only zero. When `MDT` bit is cleared,
+the `MIE` bit remains zero in RV32, and assumes the value written to it in RV64.
+
+If either of these extensions is implemented, a new Exception Code (value = 16)
+called the double trap is introduced. The bit 16 of the `medeleg` and the
+`hedeleg` CSRs are read-only zero as the double trap is not delegatable.
 
 When `menvcfg.DTE` is zero, the implementation behaves as though Ssdbltrp is not
 implemented. When Ssdbltrp is not implemented `mstatus.SDT`, `vsstatus.SDT`, and
