@@ -196,7 +196,7 @@ optional measure to aid in the recovery from such critical errors.
 * In M-mode, when the Smrnmi extension is implemented and `mnstatus.NMIE` is 1,
   the hart invokes the RNMI handler as follows:
 
-  ** The `mnepc` and `mcause` registers are written with the values that the
+  ** The `mnepc` and `mncause` registers are written with the values that the
      _unexpected trap_ would have written to the `mepc` and `mcause` registers
      respectively. The privilege mode information fields in the `mnstatus`
      register are written to indicate M-mode and its `NMIE` field is set to 0.
