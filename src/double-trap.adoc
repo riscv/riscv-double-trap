@@ -75,7 +75,7 @@ recover from the initial trap. Trap handlers are designed to neither enable
 interrupts nor cause exceptions during this phase of handling. However, managing
 Hardware-Error exceptions cite:[PRIV], which may occur unpredictably, presents
 significant challenges in trap handler implementation due to the potential risk
-of a double trap triggered by such an exception
+of a double trap.
 
 The ISA Double Trap Extensions are devised to tackle situations where
 conventional fault handling mechanisms fall short. Although a double trap
@@ -86,17 +86,16 @@ The following ISA extensions are defined to enhance fault handling capabilities:
 
 * Ssdbltrp: This extension is designed to address double trap at privilege modes
   lower than M. It enables HS-mode to invoke a critical error handler in a
-  virtual machine when a double trap occurs in VS-mode, and allows M-mode to
-  invoke a critical error handler in the OS/Hypervisor when a double trap in
-  S/HS-mode.
+  virtual machine on a double trap in VS-mode, and allows M-mode to invoke a
+  critical error handler in the OS/Hypervisor on a double trap in S/HS-mode.
 
-* Smdbltrp: This extension specifically addresses double trap in M-mode. When the
-  Smrnmi extension cite:[SMRNMI] is also implemented, the Smdbltrp extension
-  enables invocation of the RNMI handler on a double trap in M-mode to handle
-  the critical error. When the Smrnmi extension is not implemented or if a
-  double trap occurs during the RNMI handlers execution, the Smdbltrp extension
-  facilitates transitioning the hart to a critical error state on a double trap
-  in M-mode and enables the signaling the critical error to the platform.
+* Smdbltrp: This extension addresses double trap in M-mode. When the Smrnmi
+  extension cite:[SMRNMI] is also implemented, this extension enables invocation
+  of the RNMI handler on a double trap in M-mode to handle the critical error.
+  When the Smrnmi extension is not implemented or if a double trap occurs during
+  the RNMI handler's execution, this extension facilitates transitioning the
+  hart to a critical error state and enables signaling the critical error to the
+  platform.
 
 * Sddbltrp: Aimed at improving error diagnosis and resolution, this extension
   supports external debugging of harts in a critical error state, resulting from
