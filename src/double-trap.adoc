@@ -75,7 +75,7 @@ recover from the initial trap. Trap handlers are designed to neither enable
 interrupts nor cause exceptions during this phase of handling. However, managing
 Hardware-Error exceptions cite:[PRIV], which may occur unpredictably, presents
 significant challenges in trap handler implementation due to the potential risk
-of a double trap triggered by such an exception
+of a double trap.
 
 The ISA Double Trap Extensions are devised to tackle situations where
 conventional fault handling mechanisms fall short. Although a double trap
@@ -86,17 +86,16 @@ The following ISA extensions are defined to enhance fault handling capabilities:
 
 * Ssdbltrp: This extension is designed to address double trap at privilege modes
   lower than M. It enables HS-mode to invoke a critical error handler in a
-  virtual machine when a double trap occurs in VS-mode, and allows M-mode to
-  invoke a critical error handler in the OS/Hypervisor when a double trap in
-  S/HS-mode.
+  virtual machine on a double trap in VS-mode, and allows M-mode to invoke a
+  critical error handler in the OS/Hypervisor on a double trap in S/HS-mode.
 
-* Smdbltrp: This extension specifically addresses double trap in M-mode. When the
-  Smrnmi extension cite:[SMRNMI] is also implemented, the Smdbltrp extension
-  enables invocation of the RNMI handler on a double trap in M-mode to handle
-  the critical error. When the Smrnmi extension is not implemented or if a
-  double trap occurs during the RNMI handlers execution, the Smdbltrp extension
-  facilitates transitioning the hart to a critical error state on a double trap
-  in M-mode and enables the signaling the critical error to the platform.
+* Smdbltrp: This extension addresses double trap in M-mode. When the Smrnmi
+  extension cite:[SMRNMI] is also implemented, this extension enables invocation
+  of the RNMI handler on a double trap in M-mode to handle the critical error.
+  When the Smrnmi extension is not implemented or if a double trap occurs during
+  the RNMI handler's execution, this extension facilitates transitioning the
+  hart to a critical error state and enables signaling the critical error to the
+  platform.
 
 * Sddbltrp: Aimed at improving error diagnosis and resolution, this extension
   supports external debugging of harts in a critical error state, resulting from
@@ -109,20 +108,29 @@ due to a double trap in M-mode, serving as a complement to the Ssdbltrp extensio
 === Ssdbltrp and Smdbltrp Operational Details
 
 The Smdbltrp extension introduces an M-mode-disable-trap (`MDT`) field (bit 45)
-to the `mstatus` CSR for RV64. For RV32 this field is located in the `mstatush`
+to the `mstatus` CSR for RV64. For RV32, this field is located in the `mstatush`
 CSR at bit position 13. Upon reset, the `MDT` field is set to 1. The Ssdbltrp 
 adds an S-mode-disable-trap (`SDT`) field (bit 24) to the `mstatus` CSR and a
 double-trap-enable (`DTE`) field (bit 59) to the `menvcfg` CSR. If the
 H-extension is implemented, Ssdbltrp also adds a `SDT` field (bit 24) to the
-`vsstatus` CSR and a `DTE` field (bit 59) to the `henvcfg` CSR. If either of
-these extensions is implemented, a new Exception Code (value = 16) called the
-double trap is introduced. The bit 16 of the `medeleg` and the `hedeleg` CSRs
-are read-only zero as the double trap is not delegatable.
+`vsstatus` CSR and a `DTE` field (bit 59) to the `henvcfg` CSR.
 
-While the `SDT` bit is 1, the `SIE` bit is read-only zero. When the `SDT` bit is
-cleared, `SIE` bit assumes the value written to it. While the `MDT` bit is 1,
-the MIE` bit is read-only zero. When `MDT` bit is cleared, the `MIE` bit remains
-zero in RV32, and assumes the value written to it in RV64.
+When the `SDT` bit is set to 1 by a CSR operation, the `SIE` (Supervisor
+Interrupt Enable) bit is cleared to 0. This clearing occurs regardless of the
+value written, if any, to the `SIE` bit by the same operation. The `SIE` bit
+can only be set to 1 by a CSR operation if the `SDT` bit is already 0 or is
+being set to 0 by the same operation. When the `MDT` bit is set to 1 by a CSR
+operation, the `MIE` (Machine Interrupt Enable) bit is cleared to 0. For RV64,
+this clearing occurs regardless of the value written, if any, to the `MIE` bit
+by the same operation. The `MIE` bit can only be set to 1 by a CSR operation if
+the `MDT` bit is already 0 or, for RV64, is being set to 0 by the same
+operation.
+
+If either of these extensions is implemented, a new Exception Code (value = 16)
+called the double trap is introduced. The bit 16 of the `medeleg` and the
+`hedeleg` CSRs are read-only zero as the double trap is not delegatable.
+
+The Ssdbltrap extension requires the implementation of the `mtval2` CSR.
 
 When `menvcfg.DTE` is zero, the implementation behaves as though Ssdbltrp is not
 implemented. When Ssdbltrp is not implemented `mstatus.SDT`, `vsstatus.SDT`, and
@@ -145,12 +153,6 @@ An `__x__RET` instruction sets the `__x__DT` bit to 0.
 A trap handler after saving the state needed for resuming from the trap, including
 `__x__cause`, `__x__epc`, and `__x__tval` among others, should clear the `__x__DT`
 bit when it is reentrant.
-
-When a trap is taken to privilege mode `x`, the `__x__IE` bit is set to 0, and
-concurrently, the `__x__DT` bit is set to 1. This action disables all maskable
-interrupts at privilege level `x`. Interrupts may be re-enabled by setting the
-`__x__IE` bit to 1, which can be done either simultaneously with the clearing of
-the `__x__DT` bit or subsequent to the clearing of the `__x__DT` bit.
 
 Resetting of the `__x__DT` by an `__x__RET` enables the trap handler to detect
 double trap occuring during the tail phase, where it restores critical state in
@@ -193,6 +195,8 @@ Additionally, the implementation of an SSE protocol can be considered as an
 optional measure to aid in the recovery from such critical errors.
 ====
 
+<<<
+
 * In M-mode, when the Smrnmi extension is implemented and `mnstatus.NMIE` is 1,
   the hart invokes the RNMI handler as follows:
 
@@ -222,8 +226,6 @@ The actions performed by the platform on assertion of a `critical-error` signal
 by a hart are platform specific. The range of possible actions include restarting
 the affected hart or restarting the entire platform among others.
 ====
-
-The Ssdbltrap extension requires the implementation of the `mtval2` CSR.
 
 === Sddbltrp Operational Details
 
