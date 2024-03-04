@@ -130,6 +130,8 @@ If either of these extensions is implemented, a new Exception Code (value = 16)
 called the double trap is introduced. The bit 16 of the `medeleg` and the
 `hedeleg` CSRs are read-only zero as the double trap is not delegatable.
 
+The Ssdbltrap extension requires the implementation of the `mtval2` CSR.
+
 When `menvcfg.DTE` is zero, the implementation behaves as though Ssdbltrp is not
 implemented. When Ssdbltrp is not implemented `mstatus.SDT`, `vsstatus.SDT`, and
 `henvcfg.DTE` bits are read-only zero. When `henvcfg.DTE` is zero, the
@@ -224,8 +226,6 @@ The actions performed by the platform on assertion of a `critical-error` signal
 by a hart are platform specific. The range of possible actions include restarting
 the affected hart or restarting the entire platform among others.
 ====
-
-The Ssdbltrap extension requires the implementation of the `mtval2` CSR.
 
 === Sddbltrp Operational Details
 
