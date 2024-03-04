@@ -108,7 +108,7 @@ due to a double trap in M-mode, serving as a complement to the Ssdbltrp extensio
 === Ssdbltrp and Smdbltrp Operational Details
 
 The Smdbltrp extension introduces an M-mode-disable-trap (`MDT`) field (bit 45)
-to the `mstatus` CSR for RV64. For RV32 this field is located in the `mstatush`
+to the `mstatus` CSR for RV64. For RV32, this field is located in the `mstatush`
 CSR at bit position 13. Upon reset, the `MDT` field is set to 1. The Ssdbltrp 
 adds an S-mode-disable-trap (`SDT`) field (bit 24) to the `mstatus` CSR and a
 double-trap-enable (`DTE`) field (bit 59) to the `menvcfg` CSR. If the
@@ -144,17 +144,17 @@ executing in M-mode with the `mnstatus.NMIE` set to 0 similarly results in a
 critical error condition. The trap that caused the critical error condition is
 henceforth called the _unexpected trap_.
 
+An `__x__RET` instruction sets the `__x__DT` bit to 0.
+
 [NOTE]
 ====
 A trap handler after saving the state needed for resuming from the trap, including
 `__x__cause`, `__x__epc`, and `__x__tval` among others, should clear the `__x__DT`
 bit when it is reentrant.
 
-When a trap is taken to privilege mode `x`, the `__x__IE` bit is set to 0, and
-concurrently, the `__x__DT` bit is set to 1. This action disables all maskable
-interrupts at privilege level `x`. Interrupts may be re-enabled by setting the
-`__x__IE` bit to 1, which can be done either simultaneously with the clearing of
-the `__x__DT` bit or subsequent to the clearing of the `__x__DT` bit.
+Resetting of the `__x__DT` by an `__x__RET` enables the trap handler to detect
+double trap occuring during the tail phase, where it restores critical state in
+preparation for resuming execution after the trap.
 ====
 
 In the event of a critical error condition, the handling varies based on the
@@ -221,15 +221,6 @@ examining its source register contents.
 The actions performed by the platform on assertion of a `critical-error` signal
 by a hart are platform specific. The range of possible actions include restarting
 the affected hart or restarting the entire platform among others.
-====
-
-An `__x__RET` instruction sets the `__x__DT` bit to 0.
-
-[NOTE]
-====
-Resetting of the `__x__DT` by an `__x__RET` enables the trap handler to detect
-double trap occuring during the tail phase, where it restores critical state in
-preparation for resuming execution after the trap.
 ====
 
 The Ssdbltrap extension requires the implementation of the `mtval2` CSR.
