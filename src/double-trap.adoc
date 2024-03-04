@@ -116,13 +116,16 @@ double-trap-enable (`DTE`) field (bit 59) to the `menvcfg` CSR. If the
 H-extension is implemented, Ssdbltrp also adds a `SDT` field (bit 24) to the
 `vsstatus` CSR and a `DTE` field (bit 59) to the `henvcfg` CSR.
 
-When the `SDT` bit is set to 1, the `SIE` bit is automatically set to 0,
-regardless of the value written to the `SIE` bit. While the `SDT` bit is 1, the
-`SIE` bit is read-only zero. When the `SDT` bit is cleared, `SIE` bit assumes
-the value written to it. When the `MDT` bit is set to 1, the `MIE` bit is
-automatically set to 0, regardless of the value written to the `MIE` bit. While
-the `MDT` bit is 1, the `MIE` bit is read-only zero. When `MDT` bit is cleared,
-the `MIE` bit remains zero in RV32, and assumes the value written to it in RV64.
+When the `SDT` bit is set to 1 by a CSR operation, the `SIE` (Supervisor
+Interrupt Enable) bit is cleared to 0. This clearing occurs regardless of the
+value written, if any, to the `SIE` bit by the same operation. The `SIE` bit
+can only be set to 1 by a CSR operation if the `SDT` bit is already 0 or is
+being set to 0 by the same operation. When the `MDT` bit is set to 1 by a CSR
+operation, the `MIE` (Machine Interrupt Enable) bit is cleared to 0. For RV64,
+this clearing occurs regardless of the value written, if any, to the `MIE` bit
+by the same operation. The `MIE` bit can only be set to 1 by a CSR operation if
+the `MDT` bit is already 0 or, for RV64, is being set to 0 by the same
+operation.
 
 If either of these extensions is implemented, a new Exception Code (value = 16)
 called the double trap is introduced. The bit 16 of the `medeleg` and the
@@ -142,8 +145,6 @@ executing in M-mode with the `mnstatus.NMIE` set to 0 similarly results in a
 critical error condition. The trap that caused the critical error condition is
 henceforth called the _unexpected trap_.
 
-An `__x__RET` instruction sets the `__x__DT` bit to 0.
-
 [NOTE]
 ====
 A trap handler after saving the state needed for resuming from the trap, including
@@ -155,10 +156,6 @@ concurrently, the `__x__DT` bit is set to 1. This action disables all maskable
 interrupts at privilege level `x`. Interrupts may be re-enabled by setting the
 `__x__IE` bit to 1, which can be done either simultaneously with the clearing of
 the `__x__DT` bit or subsequent to the clearing of the `__x__DT` bit.
-
-Resetting of the `__x__DT` by an `__x__RET` enables the trap handler to detect
-double trap occuring during the tail phase, where it restores critical state in
-preparation for resuming execution after the trap.
 ====
 
 In the event of a critical error condition, the handling varies based on the
@@ -225,6 +222,15 @@ examining its source register contents.
 The actions performed by the platform on assertion of a `critical-error` signal
 by a hart are platform specific. The range of possible actions include restarting
 the affected hart or restarting the entire platform among others.
+====
+
+An `__x__RET` instruction sets the `__x__DT` bit to 0.
+
+[NOTE]
+====
+Resetting of the `__x__DT` by an `__x__RET` enables the trap handler to detect
+double trap occuring during the tail phase, where it restores critical state in
+preparation for resuming execution after the trap.
 ====
 
 The Ssdbltrap extension requires the implementation of the `mtval2` CSR.
