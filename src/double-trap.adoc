@@ -105,6 +105,8 @@ In addition to these, a non-ISA extension to the RISC-V Debug specification 1.0
 is defined, intended for external debugging of harts in a critical error state
 due to a double trap in M-mode, serving as a complement to the Ssdbltrp extension.
 
+<<<
+
 === Ssdbltrp Operational Details
 
 The Ssdbltrp adds an S-mode-disable-trap (`SDT`) field (bit 24) to the `mstatus`
@@ -183,6 +185,8 @@ Additionally, the implementation of an SSE protocol can be considered as an
 optional measure to aid in the recovery from such critical errors.
 ====
 
+<<<
+
 === Smdbltrp Operational Details
 
 The Smdbltrp extension introduces an M-mode-disable-trap (`MDT`) field (bit 45)
@@ -240,6 +244,8 @@ by a hart are platform specific. The range of possible actions include restartin
 the affected hart or restarting the entire platform among others.
 ====
 
+<<<
+
 === Sddbltrp Operational Details
 
 The Sddbltrp extension introduces a read-only previous-critical-error (`pcerr`)
@@ -250,6 +256,8 @@ critical error state enters Debug Mode upon a halt request from the DM. Upon
 this transition to Debug Mode, the `pcerr` field of `dcsr` is set to 1, and
 `dpc` set to the `pc`. Resuming from Debug Mode with `pcerr` is 1 returns the
 hart to the critical error state.
+
+<<<
 
 === Non-ISA Debug Module (DM) Extension
 
