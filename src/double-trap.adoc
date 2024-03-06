@@ -88,7 +88,8 @@ The following ISA extensions are defined to enhance fault handling capabilities:
 * Ssdbltrp: This extension is designed to address double trap at privilege modes
   lower than M. It enables HS-mode to invoke a critical error handler in a
   virtual machine on a double trap in VS-mode, and allows M-mode to invoke a
-  critical error handler in the OS/Hypervisor on a double trap in S/HS-mode.
+  critical error handler in the OS/Hypervisor on a double trap in S/HS-mode. The
+  Ssdbltrp extension is specified in <<SSDBLTRP>>.
 
 * Smdbltrp: This extension addresses double trap in M-mode. When the Smrnmi
   extension cite:[SMRNMI] is also implemented, this extension enables invocation
@@ -96,18 +97,20 @@ The following ISA extensions are defined to enhance fault handling capabilities:
   When the Smrnmi extension is not implemented or if a double trap occurs during
   the RNMI handler's execution, this extension facilitates transitioning the
   hart to a critical error state and enables signaling the critical error to the
-  platform.
+  platform. The Ssdbltrp extension is specified in <<SMDBLTRP>>.
 
 * Sddbltrp: Aimed at improving error diagnosis and resolution, this extension
   supports external debugging of harts in a critical error state, resulting from
-  a double trap in M-mode.
+  a double trap in M-mode. The Sddbltrp extension is specified in <<SDDBLTRP>>.
 
 In addition to these, a non-ISA extension to the RISC-V Debug specification 1.0
 is defined, intended for external debugging of harts in a critical error state
 due to a double trap in M-mode, serving as a complement to the Ssdbltrp extension.
+This extension is specified in <<DMEXT>>.
 
 <<<
 
+[[SSDBLTRP]]
 === Ssdbltrp Operational Details
 
 The Ssdbltrp adds an S-mode-disable-trap (`SDT`) field (bit 24) to the `mstatus`
@@ -175,6 +178,7 @@ optional measure to aid in the recovery from such critical errors.
 
 <<<
 
+[[SMDBLTRP]]
 === Smdbltrp Operational Details
 
 The Smdbltrp extension adds an M-mode-disable-trap (`MDT`) field (bit 45) to the
@@ -232,6 +236,7 @@ the affected hart or restarting the entire platform among others.
 
 <<<
 
+[[SDDBLTRP]]
 === Sddbltrp Operational Details
 
 The Sddbltrp extension adds a read-only previous-critical-error (`pcerr`) field
@@ -247,6 +252,7 @@ with `pcerr` is 1 returns the hart to the critical error state.
 
 <<<
 
+[[DMEXT]]
 === Non-ISA Debug Module (DM) Extension
 
 The RISC-V Debug 1.0 specification is extended with a new optional control bit
