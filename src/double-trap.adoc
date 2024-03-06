@@ -113,10 +113,10 @@ due to a double trap in M-mode, serving as a complement to the Ssdbltrp extensio
 The Ssdbltrp adds an S-mode-disable-trap (`SDT`) field (bit 24) to the `mstatus`
 CSR and a double-trap-enable (`DTE`) field (bit 59) to the `menvcfg` CSR. If the
 H-extension is implemented, Ssdbltrp also adds a `SDT` field (bit 24) to the
-`vsstatus` CSR and a `DTE` field (bit 59) to the `henvcfg` CSR. An Exception
-Code (value = 16) called the double trap is introduced. The Ssdbltrap extension
-requires the implementation of the `mtval2` CSR. The bit 16 of the `medeleg` and
-the `hedeleg` CSRs are read-only zero as the double trap is not delegatable. 
+`vsstatus` CSR and a `DTE` field (bit 59) to the `henvcfg` CSR. The Ssdbltrap
+extension requires the implementation of the `mtval2` CSR. An Exception Code
+(value = 16) called the double trap is introduced. The bit 16 of the `medeleg`
+and the `hedeleg` CSRs are read-only zero as the double trap is not delegatable.
 
 When `menvcfg.DTE` is zero, the implementation behaves as though Ssdbltrp is not
 implemented. When Ssdbltrp is not implemented `mstatus.SDT`, `vsstatus.SDT`, and
@@ -149,8 +149,8 @@ including `scause`, `sepc`, and `stval` among others, should clear the `SDT` bit
 when it is reentrant.
 
 Resetting of the `SDT` by an `SRET` enables the trap handler to detect double
-trap occuring during the tail phase, where it restores critical state in
-preparation for resuming execution after the trap.
+trap occuring during the tail phase, where it restores critical state to return
+from a trap.
 
 The consequence of this specification is that if a critical error condition was
 caused by a guest page-fault, then the GPA will not be available in `mtval2`
@@ -237,13 +237,15 @@ the affected hart or restarting the entire platform among others.
 === Sddbltrp Operational Details
 
 The Sddbltrp extension introduces a read-only previous-critical-error (`pcerr`)
-field (bit 19) to the `dcsr` CSR. If Sddbltrp is not implemented, a hart that is
-in critical error state does not enter Debug Mode when requested by a halt
-request from the Debug Module (DM). If Sddbltrp is implemented, a hart in
-critical error state enters Debug Mode upon a halt request from the DM. Upon
-this transition to Debug Mode, the `pcerr` field of `dcsr` is set to 1, and
-`dpc` set to the `pc`. Resuming from Debug Mode with `pcerr` is 1 returns the
-hart to the critical error state.
+field (bit 19) to the `dcsr` CSR.
+
+If Sddbltrp is not implemented, a hart that is in critical error state does not
+enter Debug Mode when requested by a halt request from the Debug Module (DM).
+
+If Sddbltrp is implemented, a hart in critical error state enters Debug Mode
+upon a halt request from the DM. Upon this transition to Debug Mode, the `pcerr`
+field of `dcsr` is set to 1, and `dpc` set to the `pc`. Resuming from Debug Mode
+with `pcerr` is 1 returns the hart to the critical error state.
 
 <<<
 
