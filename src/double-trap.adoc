@@ -97,7 +97,7 @@ The following ISA extensions are defined to enhance fault handling capabilities:
   When the Smrnmi extension is not implemented or if a double trap occurs during
   the RNMI handler's execution, this extension facilitates transitioning the
   hart to a critical error state and enables signaling the critical error to the
-  platform. The Ssdbltrp extension is specified in <<SMDBLTRP>>.
+  platform. The Smdbltrp extension is specified in <<SMDBLTRP>>.
 
 * Sddbltrp: Aimed at improving error diagnosis and resolution, this extension
   supports external debugging of harts in a critical error state, resulting from
