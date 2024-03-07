@@ -205,12 +205,11 @@ An `MRET` instruction sets the `MDT` bit to 0.
 In the event of a critical error condition, the handling is as follows:
 
 * When the Smrnmi extension is implemented and `mnstatus.NMIE` is 1, the hart
-  invokes the RNMI handler as follows:
-
-  ** The `mnepc` and `mncause` registers are written with the values that the
-     _unexpected trap_ would have written to the `mepc` and `mcause` registers
-     respectively. The privilege mode information fields in the `mnstatus`
-     register are written to indicate M-mode and its `NMIE` field is set to 0.
+  traps to the RNMI handler. To deliver this trap, the `mnepc` and `mncause`
+  registers are written with the values that the _unexpected trap_ would have
+  written to the `mepc` and `mcause` registers respectively. The privilege mode
+  information fields in the `mnstatus` register are written to indicate M-mode
+  and its `NMIE` field is set to 0.
 
 [NOTE]
 ====
