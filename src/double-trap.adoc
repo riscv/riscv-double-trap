@@ -117,9 +117,9 @@ The Ssdbltrp adds an S-mode-disable-trap (`SDT`) field (bit 24) to the `mstatus`
 CSR and a double-trap-enable (`DTE`) field (bit 59) to the `menvcfg` CSR. If the
 H-extension is implemented, Ssdbltrp also adds a `SDT` field (bit 24) to the
 `vsstatus` CSR and a `DTE` field (bit 59) to the `henvcfg` CSR. For RV32, the
-`DTE` field is in bit 27 or the `menvcfgh` and `henvcfgh` CSRs. The Ssdbltrap
-extension requires the implementation of the `mtval2` CSR. An Exception Code
-(value = 16) called the double trap is introduced. The bit 16 of the `medeleg`
+`DTE` field is located in bit 27 of the `menvcfgh` and `henvcfgh` CSRs. The
+Ssdbltrap extension requires the implementation of the `mtval2` CSR. An Exception
+Code (value = 16) called the double trap is introduced. The bit 16 of the `medeleg`
 and the `hedeleg` CSRs are read-only zero as the double trap is not delegatable.
 
 When `menvcfg(h).DTE` is zero, the implementation behaves as though Ssdbltrp is not
