@@ -116,15 +116,14 @@ This extension is specified in <<DMEXT>>.
 The Ssdbltrp adds an S-mode-disable-trap (`SDT`) field (bit 24) to the `mstatus`
 CSR and a double-trap-enable (`DTE`) field (bit 59) to the `menvcfg` CSR. If the
 H-extension is implemented, Ssdbltrp also adds a `SDT` field (bit 24) to the
-`vsstatus` CSR and a `DTE` field (bit 59) to the `henvcfg` CSR. For RV32, the
-`DTE` field is located in bit 27 of the `menvcfgh` and `henvcfgh` CSRs. The
-Ssdbltrap extension requires the implementation of the `mtval2` CSR. An Exception
-Code (value = 16) called the double trap is introduced. The bit 16 of the `medeleg`
+`vsstatus` CSR and a `DTE` field (bit 59) to the `henvcfg` CSR. The Ssdbltrap
+extension requires the implementation of the `mtval2` CSR. An Exception Code
+(value = 16) called the double trap is introduced. The bit 16 of the `medeleg`
 and the `hedeleg` CSRs are read-only zero as the double trap is not delegatable.
 
-When `menvcfg(h).DTE` is zero, the implementation behaves as though Ssdbltrp is not
+When `menvcfg.DTE` is zero, the implementation behaves as though Ssdbltrp is not
 implemented. When Ssdbltrp is not implemented `mstatus.SDT`, `vsstatus.SDT`, and
-`henvcfg(h).DTE` bits are read-only zero. When `henvcfg(h).DTE` is zero, the
+`henvcfg.DTE` bits are read-only zero. When `henvcfg.DTE` is zero, the
 implementation behaves as though Ssdbltrp is not implemented for VS-mode and the
 `vsstatus.SDT` bit is read-only zero.
 
@@ -182,9 +181,9 @@ optional measure to aid in the recovery from such critical errors.
 [[SMDBLTRP]]
 === Smdbltrp Operational Details
 
-The Smdbltrp extension adds an M-mode-disable-trap (`MDT`) field (bit 45) to the
+The Smdbltrp extension adds an M-mode-disable-trap (`MDT`) field (bit 42) to the
 `mstatus` CSR for RV64. For RV32, this field is located in the `mstatush` CSR at
-bit position 13. Upon reset, the `MDT` field is set to 1. An Exception Code
+bit position 10. Upon reset, the `MDT` field is set to 1. An Exception Code
 (value = 16) called the double trap is introduced.
 
 When the `MDT` bit is set to 1 by an explicit CSR write, the `MIE` (Machine
@@ -196,21 +195,18 @@ in `mstatush` and the `MIE` bit in `mstatus` register).
 
 When a trap is to be taken into M-mode, if the `MDT` bit is currently 0, it is
 then set to 1, and the trap is delivered as expected. However, if `MDT` is
-already set to 1, a critical error condition occurs. Additionally, when the
-Smrnmi extension is implemented, encountering an exception while executing in
-M-mode with the `mnstatus.NMIE` set to 0 similarly results in a critical error
-condition.
+already set to 1, then this is an _unexpected trap_. Additionally, when the
+Smrnmi extension is implemented, a trap that occurs when executing in M-mode
+with the `mnstatus.NMIE` set to 0 is an _unexpected trap_.
 
-An `MRET` instruction sets the `MDT` bit to 0.
-
-In the event of a critical error condition, the handling is as follows:
+In the event of a _unexpected trap_, the handling is as follows:
 
 * When the Smrnmi extension is implemented and `mnstatus.NMIE` is 1, the hart
   traps to the RNMI handler. To deliver this trap, the `mnepc` and `mncause`
   registers are written with the values that the _unexpected trap_ would have
-  written to the `mepc` and `mcause` registers respectively. The privilege mode
-  information fields in the `mnstatus` register are written to indicate M-mode
-  and its `NMIE` field is set to 0.
+  written to the `mepc` and `mcause` registers respectively. The privilege
+  mode information fields in the `mnstatus` register are written to indicate
+  M-mode and its `NMIE` field is set to 0
 
 [NOTE]
 ====
@@ -233,6 +229,8 @@ The actions performed by the platform on assertion of a `critical-error` signal
 by a hart are platform specific. The range of possible actions include restarting
 the affected hart or restarting the entire platform among others.
 ====
+
+An `MRET` instruction sets the `MDT` bit to 0.
 
 <<<
 
