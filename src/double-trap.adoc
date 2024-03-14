@@ -48,7 +48,7 @@ likely not conform to the future standard.
 ====
 
 [preface]
-=== Copyright and license information
+== Copyright and license information
 This specification is licensed under the Creative Commons
 Attribution 4.0 International License (CC-BY 4.0). The full
 license text is available at
@@ -57,7 +57,7 @@ https://creativecommons.org/licenses/by/4.0/.
 Copyright 2024 by RISC-V International.
 
 [preface]
-=== Contributors
+== Contributors
 This RISC-V specification has been contributed to directly or indirectly by:
 Allen Baum, Andrew Waterman, Deepak Gupta, Earl Killian, Greg Favor, John
 Hauser, Joshua Scheid, Paul Donahue, and Ved Shanbhogue
