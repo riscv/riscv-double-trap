@@ -28,7 +28,7 @@ endif
 SRC_DIR := src
 BUILD_DIR := build
 
-DOCS_PDF := $(DOCS:%.adoc=%.pdf)
+DOCS_PDF := $(DOCS:%.adoc=riscv-%.pdf)
 DOCS_HTML := $(DOCS:%.adoc=%.html)
 
 XTRA_ADOC_OPTS :=
