@@ -1,4 +1,4 @@
-[[header]]
+= Double Trap Extensions
 :description: Double Trap Extensions
 :company: RISC-V.org
 :revdate: 03/2024
@@ -9,15 +9,15 @@
 :preface-title: Preamble
 :colophon:
 :appendix-caption: Appendix
-:imagesdir: images
-:title-logo-image: image:risc-v_logo.png[pdfwidth=3.25in,align=center]
+:imagesdir: ../docs-resources/images
+:title-logo-image: image:risc-v_logo.png["RISC-V International Logo",pdfwidth=3.25in,align=center]
 // Settings:
 :experimental:
 :reproducible:
-// needs to be changed? bug discussion started
 //:WaveDromEditorApp: app/wavedrom-editor.app
-:imagesoutdir: images
-:bibtex-file: src/double-trap.bib
+:imagesoutdir: ./build/images
+:srcdir: src
+:bibtex-file: {srcdir}/double-trap.bib
 :bibtex-order: appearance
 :bibtex-style: ieee
 :icons: font
@@ -36,9 +36,7 @@ endif::[]
 :footnote:
 :xrefstyle: short
 
-= Double Trap Extensions
 
-// Preamble
 [WARNING]
 .This document is in the link:http://riscv.org/spec-state[Development state]
 ====
@@ -49,6 +47,7 @@ likely not conform to the future standard.
 
 [preface]
 == Copyright and license information
+
 This specification is licensed under the Creative Commons
 Attribution 4.0 International License (CC-BY 4.0). The full
 license text is available at
@@ -57,10 +56,7 @@ https://creativecommons.org/licenses/by/4.0/.
 Copyright 2024 by RISC-V International.
 
 [preface]
-== Contributors
-This RISC-V specification has been contributed to directly or indirectly by:
-Allen Baum, Andrew Waterman, Deepak Gupta, Earl Killian, Greg Favor, John
-Hauser, Joshua Scheid, Paul Donahue, and Ved Shanbhogue
+include::contributors.adoc[]
 
 == Double Trap
 
