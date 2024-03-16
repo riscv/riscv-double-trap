@@ -28,7 +28,7 @@ endif
 SRC_DIR := src
 BUILD_DIR := build
 
-DOCS_PDF := $(DOCS:%.adoc=riscv-%.pdf)
+DOCS_PDF := riscv-double-trap.pdf
 DOCS_HTML := $(DOCS:%.adoc=%.html)
 
 XTRA_ADOC_OPTS :=
@@ -57,7 +57,7 @@ build-docs: $(DOCS_PDF) $(DOCS_HTML)
 
 vpath %.adoc $(SRC_DIR)
 
-%.pdf: %.adoc
+riscv-double-trap.pdf: %.adoc
 	$(DOCKER_CMD) $(DOCKER_QUOTE) $(ASCIIDOCTOR_PDF) $(OPTIONS) $(REQUIRES) $< $(DOCKER_QUOTE)
 
 %.html: %.adoc
