@@ -13,7 +13,7 @@
 # the Doc Template for RISC-V Extensions.
 
 DOCS := \
-	double-trap.adoc
+	riscv-double-trap.adoc
 
 DATE ?= $(shell date +%Y-%m-%d)
 VERSION ?= v0.7
