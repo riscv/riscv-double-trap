@@ -234,45 +234,27 @@ An `MRET` instruction sets the `MDT` bit to 0.
 [[SDDBLTRP]]
 === Sddbltrp Operational Details
 
-The Sddbltrp extension adds a read-only previous-critical-error (`pcerr`) field
-(bit 19) to the `dcsr` CSR.
+The Sddbltrp extension introduces a read-write critical-error-trigger (`cetrig`)
+field (bit 19) and a 3-bit read-write extended-cause (`extcause`) field
+(bits 26:24) to the `dcsr` CSR. When the `cause` field of `dcsr` holds a value
+of 7 upon Debug Mode entry, it signifies that an extended cause is valid in the
+`extcause` field.
 
-If Sddbltrp is not implemented, a hart that is in critical error state does not
-enter Debug Mode when requested by a halt request from the Debug Module (DM).
+When `cetrig` is set to 1, a hart in a critical error state enters Debug Mode
+instead of asserting the critical-error signal to the platform. Upon such entry
+into Debug Mode, the `cause` field is set to 7, and the `extcause` field is set
+to 0, indicating a critical error triggered the Debug Mode entry. This cause has
+the highest priority among all reasons for entering Debug Mode.
 
-If Sddbltrp is implemented, a hart in critical error state enters Debug Mode
-upon a halt request from the DM. Upon this transition to Debug Mode, the `pcerr`
-field of `dcsr` is set to 1, and `dpc` set to the `pc`. Resuming from Debug Mode
-with `pcerr` is 1 returns the hart to the critical error state.
-
-<<<
-
-[[DMEXT]]
-=== Non-ISA Debug Module (DM) Extension
-
-The RISC-V Debug 1.0 specification is extended with a new optional control bit
-suppress-critical-error-signal (`scerr`), defined in the `dmcs2` register
-(bit 12) of the DM, to manage the `critical-error` signal. When `scerr` is set
-to 1, the `critical-error` signal asserted by any hart associated with that DM
-is masked and prevented from causing its normal platform specified action.
+Resuming from Debug Mode following an entry from the critical error state
+returns the hart to the critical error state.
 
 [NOTE]
 ====
-The `scerr` control enables an external debugger to disable the actions that a
-platform would normally perform when a hart asserts its `critical-error` signal.
-This allows the external debugger to enter Debug Mode in a hart that is in
-critical error state and investigate the cause of a double trap.
-====
-
-A new read-only field (bit 25) any-hart-in-critical-error (`anycerr`)
-is defined in the `dmstatus` register of the DM. This bit is 1 if any hart
-associated with the DM, irrespective of the value held in `hartsel`, asserts its
-`critical-error` signal, before any masking of the request by `scerr`.
-
-[NOTE]
-====
-The `anycerr` status bit enables an external debugger to determine if any of the
-harts associated with the DM are in a critical error state.
+The implication of this specification is that resuming from Debug Mode,
+following an entry due to a critical error, will either result in an immediate
+re-entry into Debug Mode due to the critical error if `cetrig` is set to 1, or
+it will cause the critical-error signal to be asserted to the platform.
 ====
 
 [bibliography]
