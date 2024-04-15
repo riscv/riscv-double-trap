@@ -3,4 +3,4 @@
 This RISC-V specification has been contributed to directly or indirectly by:
 
 [%hardbreaks]
-Allen Baum, Andrew Waterman, Deepak Gupta, Earl Killian, Greg Favor, John Hauser, Joshua Scheid, Paul Donahue, and Ved Shanbhogue
+Allen Baum, Andrew Waterman, Clément Léger, Deepak Gupta, Earl Killian, Greg Favor, John Hauser, Joshua Scheid, Paul Donahue, Tim Newsome, and Ved Shanbhogue
