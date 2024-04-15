@@ -83,26 +83,19 @@ The following ISA extensions are defined to enhance fault handling capabilities:
 
 * Ssdbltrp: This extension is designed to address double trap at privilege modes
   lower than M. It enables HS-mode to invoke a critical error handler in a
-  virtual machine on a double trap in VS-mode, and allows M-mode to invoke a
+  virtual machine on a double trap in VS-mode. It also allows M-mode to invoke a
   critical error handler in the OS/Hypervisor on a double trap in S/HS-mode. The
   Ssdbltrp extension is specified in <<SSDBLTRP>>.
 
-* Smdbltrp: This extension addresses double trap in M-mode. When the Smrnmi
-  extension cite:[SMRNMI] is also implemented, this extension enables invocation
-  of the RNMI handler on a double trap in M-mode to handle the critical error.
-  When the Smrnmi extension is not implemented or if a double trap occurs during
-  the RNMI handler's execution, this extension facilitates transitioning the
-  hart to a critical error state and enables signaling the critical error to the
-  platform. The Smdbltrp extension is specified in <<SMDBLTRP>>.
-
-* Sddbltrp: Aimed at improving error diagnosis and resolution, this extension
-  supports external debugging of harts in a critical error state, resulting from
-  a double trap in M-mode. The Sddbltrp extension is specified in <<SDDBLTRP>>.
-
-In addition to these, a non-ISA extension to the RISC-V Debug specification 1.0
-is defined, intended for external debugging of harts in a critical error state
-due to a double trap in M-mode, serving as a complement to the Ssdbltrp extension.
-This extension is specified in <<DMEXT>>.
+* Smdbltrp: This extension addresses a double trap in M-mode. When the Smrnmi
+  extension cite:[SMRNMI] is implemented, it enables invocation of the RNMI
+  handler on a double trap in M-mode to handle the critical error. If the Smrnmi
+  extension is not implemented or if a double trap occurs during the RNMI
+  handler's execution, this extension helps transition the hart to a critical
+  error state and enables signaling the critical error to the platform. To
+  improve error diagnosis and resolution, this extension supports debugging
+  harts in a critical error state. The Smdbltrp extension is specified in
+  <<SMDBLTRP>>.
 
 <<<
 
