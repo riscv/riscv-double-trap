@@ -15,6 +15,7 @@ on:
         type: choice
         options:
           - Draft
+          - Frozen
           - Release
           - Stable
         default: Draft
