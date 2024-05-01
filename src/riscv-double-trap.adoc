@@ -188,9 +188,8 @@ When a trap is to be taken into M-mode, if the `MDT` bit is currently 0, it is
 then set to 1, and the trap is delivered as expected. However, if `MDT` is
 already set to 1, then this is an _unexpected trap_. Additionally, when the
 Smrnmi extension is implemented, a trap that occurs when executing in M-mode
-with the `mnstatus.NMIE` set to 0 is an _unexpected trap_.
-
-In the event of a _unexpected trap_, the handling is as follows:
+with the `mnstatus.NMIE` set to 0 is an _unexpected trap_. The handling of an
+_unexpected trap_ is as follows:
 
 * When the Smrnmi extension is implemented and `mnstatus.NMIE` is 1, the hart
   traps to the RNMI handler. To deliver this trap, the `mnepc` and `mncause`
@@ -227,10 +226,10 @@ The Smdbltrp extension introduces a read-write critical-error-trigger (`cetrig`)
 field (bit 19) to the `dcsr` CSR cite:[DBG]. When `cetrig` is set to 1, a hart
 in a critical error state enters Debug Mode instead of asserting the
 critical-error signal to the platform. Upon such entry into Debug Mode, the
-`cause` field is set to 7, and the `extcause` field is set to 0, indicating a
-critical error triggered the Debug Mode entry. This cause has the highest
-priority among all reasons for entering Debug Mode. Resuming from Debug Mode
-following an entry from the critical error state returns the hart to the
+`cause` field of `dcsr` is set to 7, and its `extcause` field is set to 0,
+indicating a critical error triggered the Debug Mode entry. This cause has the
+highest priority among all reasons for entering Debug Mode. Resuming from Debug
+Mode following an entry from the critical error state returns the hart to the
 critical error state.
 
 [NOTE]
@@ -238,7 +237,10 @@ critical error state.
 The implication of this specification is that resuming from Debug Mode,
 following an entry due to a critical error, will either result in an immediate
 re-entry into Debug Mode due to the critical error if `cetrig` is set to 1, or
-it will cause the critical-error signal to be asserted to the platform.
+it will cause the critical-error signal to be asserted to the platform.  The
+debugger may resume with `cetrig` set to 0 to allow the platform defined actions
+on critical-error signal to occur. Other possible actions include initiating a
+hart or platform reset using the Debug Module reset control.
 ====
 
 [bibliography]
