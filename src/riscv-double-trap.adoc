@@ -137,12 +137,12 @@ An `SRET` instruction sets the `SDT` bit to 0.
 
 [NOTE]
 ====
-A trap handler after saving the state needed for resuming from the trap,
-including `scause`, `sepc`, and `stval` among others, should clear the `SDT` bit
-when it is reentrant.
+After a trap handler, such as `scause`, `sepc`, and `stval` 
+among others, saves the state that is needed to resume from the trap, it
+should clear the `SDT` bit when it is reentrant.
 
-Resetting of the `SDT` by an `SRET` enables the trap handler to detect double
-trap occuring during the tail phase, where it restores critical state to return
+If the `SDT` is reset by an `SRET`, the trap handler is enabled to detect double
+traps that occur during the tail phase, where it restores critical state to return
 from a trap.
 
 The consequence of this specification is that if a critical error condition was
@@ -154,7 +154,7 @@ instruction in this phase of trap handling is not common. However, not recording
 the GPA is considered benign because, if required, it can still be obtained
 -- albeit with added effort -- through the process of walking the page tables.
 
-For a double trap originating in VS-mode, M-mode should redirect the exception
+For a double trap that originates in VS-mode, M-mode should redirect the exception
 to HS-mode by copying the values of M-mode CSRs updated by the trap to HS-mode
 CSRs and should use an `MRET` to resume execution at the address in `stvec`.
 
@@ -188,8 +188,8 @@ When a trap is to be taken into M-mode, if the `MDT` bit is currently 0, it is
 then set to 1, and the trap is delivered as expected. However, if `MDT` is
 already set to 1, then this is an _unexpected trap_. Additionally, when the
 Smrnmi extension is implemented, a trap that occurs when executing in M-mode
-with the `mnstatus.NMIE` set to 0 is an _unexpected trap_. The handling of an
-_unexpected trap_ is as follows:
+with the `mnstatus.NMIE` set to 0 is an _unexpected trap_. The _unexpected trap_ 
+is handled as follows:
 
 * When the Smrnmi extension is implemented and `mnstatus.NMIE` is 1, the hart
   traps to the RNMI handler. To deliver this trap, the `mnepc` and `mncause`
@@ -200,24 +200,24 @@ _unexpected trap_ is as follows:
 
 [NOTE]
 ====
-The consequence of this specification is that on occurrence of double trap the
-RNMI handler is not provided with information that a trap would report in the
-`mtval` and the `mtval2` registers. This information, if needed, may be obtained
+The consequence of this specification is that on occurrence of double trap, the
+RNMI handler is not provided with information that a trap reports in the
+`mtval` and the `mtval2` registers. This information, if needed, can be obtained
 by the RNMI handler by decoding the instruction at the address in `mnepc` and
 examining its source register contents.
 ====
 
 * When the Smrnmi extension is not implemented, or if the Smrnmi extension is
   implemented and `mnstatus.NMIE` is 0, the hart enters a critical-error state
-  without updating any architectural state including the `pc`. This state
+  without updating any architectural state, including the `pc`. This state
   involves ceasing execution, disabling all interrupts (including NMIs), and
   asserting a `critical-error` signal to the platform.
 
 [NOTE]
 ====
-The actions performed by the platform on assertion of a `critical-error` signal
-by a hart are platform specific. The range of possible actions include restarting
-the affected hart or restarting the entire platform among others.
+The actions performed by the platform when a har asserts a `critical-error` signal
+are platform-specific. The range of possible actions include restarting
+the affected hart or restarting the entire platform, among others.
 ====
 
 An `MRET` instruction sets the `MDT` bit to 0.
@@ -225,22 +225,22 @@ An `MRET` instruction sets the `MDT` bit to 0.
 The Smdbltrp extension introduces a read-write critical-error-trigger (`cetrig`)
 field (bit 19) to the `dcsr` CSR cite:[DBG]. When `cetrig` is set to 1, a hart
 in a critical error state enters Debug Mode instead of asserting the
-critical-error signal to the platform. Upon such entry into Debug Mode, the
+critical-error signal to the platform. When the hart enters Debug Mode, the
 `cause` field of `dcsr` is set to 7, and its `extcause` field is set to 0,
 indicating a critical error triggered the Debug Mode entry. This cause has the
-highest priority among all reasons for entering Debug Mode. Resuming from Debug
-Mode following an entry from the critical error state returns the hart to the
+highest priority among all reasons for entering Debug Mode. Resuming operations from 
+Debug Mode following an entry from the critical error state returns the hart to the
 critical error state.
 
 [NOTE]
 ====
-The implication of this specification is that resuming from Debug Mode,
-following an entry due to a critical error, will either result in an immediate
+The implication of this specification is that resuming operations from Debug Mode,
+following an entry due to a critical error will either result in an immediate
 re-entry into Debug Mode due to the critical error if `cetrig` is set to 1, or
-it will cause the critical-error signal to be asserted to the platform.  The
-debugger may resume with `cetrig` set to 0 to allow the platform defined actions
+it will cause the critical-error signal to be sent to the platform.  The
+debugger can resume with `cetrig` set to 0 to allow the platform-defined actions
 on critical-error signal to occur. Other possible actions include initiating a
-hart or platform reset using the Debug Module reset control.
+hart or resetting the platform by using the Debug Module reset control.
 ====
 
 [bibliography]
