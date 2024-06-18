@@ -229,7 +229,7 @@ critical-error signal to the platform. Upon such entry into  Debug Mode, the
 `cause` field of `dcsr` is set to 7, and its `extcause` field is set to 0,
 indicating a critical error triggered the Debug Mode entry. This cause has the
 highest priority among all reasons for entering Debug Mode. Resuming from Debug
-Debug Mode following an entry from the critical error state returns the hart to the
+Mode following an entry from the critical error state returns the hart to the
 critical error state.
 
 [NOTE]
