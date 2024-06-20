@@ -141,7 +141,7 @@ After a trap handler has saved the state, such as `scause`, `sepc`,
 and `stval`, needed for resuming from the trap and is reentrant, it 
 should clear the `SDT` bit.
 
-Resetting the SDT by an SRET enables the trap handler to detect a double 
+Resetting the `SDT` by an SRET enables the trap handler to detect a double 
 trap that occurs during the tail phase, where it restores a critical state 
 to return from a trap.
 
