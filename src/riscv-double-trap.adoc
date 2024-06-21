@@ -220,7 +220,7 @@ by a hart are platform specific. The range of possible actions include restartin
 the affected hart or restarting the entire platform among others.
 ====
 
-An `MRET` instruction sets the `MDT` bit to 0.
+The `MRET` and `SRET` instructions set the `MDT` bit to 0.
 
 The Smdbltrp extension introduces a read-write critical-error-trigger (`cetrig`)
 field (bit 19) to the `dcsr` CSR cite:[DBG]. When `cetrig` is set to 1, a hart
