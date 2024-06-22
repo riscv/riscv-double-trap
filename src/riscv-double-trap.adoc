@@ -230,7 +230,10 @@ critical-error signal to the platform. Upon such entry into Debug Mode, the
 indicating a critical error triggered the Debug Mode entry. This cause has the
 highest priority among all reasons for entering Debug Mode. Resuming from Debug
 Mode following an entry from the critical error state returns the hart to the
-critical error state.
+critical error state. When a hart resumes from Debug Mode, if the new privilege
+mode is less privileged than M-mode, `mstatus.MDT` is set to 0. If it is less
+privileged than S/HS-mode, `sstatus.SDT` is set to 0. If it is less privileged
+than VS-mode, `vsstatus.SDT` is set to 0.
 
 [NOTE]
 ====
