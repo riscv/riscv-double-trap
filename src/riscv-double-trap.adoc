@@ -215,8 +215,8 @@ examining its source register contents.
 
 [NOTE]
 ====
-The actions performed by the platform when a hart asserts a `critical-error` signal
-are platform-specific. The range of possible actions include restarting
+The actions performed by the platform when a hart asserts a `critical-error`
+signal are platform-specific. The range of possible actions include restarting
 the affected hart or restarting the entire platform, among others.
 ====
 
