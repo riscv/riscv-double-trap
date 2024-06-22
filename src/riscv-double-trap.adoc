@@ -141,11 +141,9 @@ mode is less privileged than VS-mode, it also sets `vsstatus.SDT` to 0.
 ====
 After a trap handler has saved the state, such as `scause`, `sepc`, 
 and `stval`, needed for resuming from the trap and is reentrant, it 
-should clear the `SDT` bit.
-
-Resetting the `SDT` by an SRET enables the trap handler to detect a double 
-trap that may occur during the tail phase, where it restores critical state 
-to return from a trap.
+should clear the `SDT` bit. Resetting the `SDT` by an SRET enables the trap
+handler to detect a double trap that may occur during the tail phase, where
+it restores critical state to return from a trap.
 
 The consequence of this specification is that if a critical error condition was
 caused by a guest page-fault, then the GPA will not be available in `mtval2`
@@ -234,10 +232,7 @@ critical-error signal to the platform. Upon such entry into Debug Mode, the
 indicating a critical error triggered the Debug Mode entry. This cause has the
 highest priority among all reasons for entering Debug Mode. Resuming from Debug
 Mode following an entry from the critical error state returns the hart to the
-critical error state. When a hart resumes from Debug Mode, if the new privilege
-mode is less privileged than M-mode, `mstatus.MDT` is set to 0. If it is less
-privileged than S/HS-mode, `sstatus.SDT` is set to 0. If it is less privileged
-than VS-mode, `vsstatus.SDT` is set to 0.
+critical error state.
 
 [NOTE]
 ====
@@ -249,6 +244,11 @@ debugger can resume with `cetrig` set to 0 to allow the platform-defined actions
 on critical-error signal to occur. Other possible actions include initiating a
 hart or platform reset using the Debug Module reset control.
 ====
+
+When a hart resumes from Debug Mode, if the new privilege mode is less privileged
+than M-mode, `mstatus.MDT` is set to 0. If it is less privileged than S/HS-mode,
+`sstatus.SDT` is set to 0. If it is less privileged than VS-mode, `vsstatus.SDT`
+is set to 0.
 
 [bibliography]
 == Bibliography
