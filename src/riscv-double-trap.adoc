@@ -133,9 +133,9 @@ taken into M-mode. The `mtval2` register is then set to what would be otherwise
 written into the `mcause` register by the _unexpected trap_. The `mcause`
 register is set to 16, the double-trap exception code.
 
-When executing in S-mode, the `SRET` instruction sets `sstatus.SDT` to 0, and
-when executing in VS-mode, it sets `vsstatus.SDT` to 0. If the new privilege
-mode is less privileged than VS-mode, it also sets `vsstatus.SDT` to 0.
+In S-mode, the `SRET` instruction sets `sstatus.SDT` to 0, and in VS-mode, it
+sets `vsstatus.SDT` to 0. If the new privilege mode is less privileged than
+VS-mode, it also sets `vsstatus.SDT` to 0.
 
 [NOTE]
 ====
@@ -234,6 +234,11 @@ highest priority among all reasons for entering Debug Mode. Resuming from Debug
 Mode following an entry from the critical error state returns the hart to the
 critical error state.
 
+When a hart resumes from Debug Mode, if the new privilege mode is less privileged
+than M-mode, `mstatus.MDT` is set to 0. If it is less privileged than S/HS-mode,
+`sstatus.SDT` is set to 0. If it is less privileged than VS-mode, `vsstatus.SDT`
+is set to 0.
+
 [NOTE]
 ====
 The implication of this specification is that resuming from Debug Mode,
@@ -244,11 +249,6 @@ debugger can resume with `cetrig` set to 0 to allow the platform-defined actions
 on critical-error signal to occur. Other possible actions include initiating a
 hart or platform reset using the Debug Module reset control.
 ====
-
-When a hart resumes from Debug Mode, if the new privilege mode is less privileged
-than M-mode, `mstatus.MDT` is set to 0. If it is less privileged than S/HS-mode,
-`sstatus.SDT` is set to 0. If it is less privileged than VS-mode, `vsstatus.SDT`
-is set to 0.
 
 [bibliography]
 == Bibliography
