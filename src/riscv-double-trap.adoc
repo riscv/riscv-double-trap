@@ -157,7 +157,6 @@ the GPA is considered benign because, if required, it can still be obtained
 For a double trap that originates in VS-mode, M-mode should redirect the exception
 to HS-mode by copying the values of M-mode CSRs updated by the trap to HS-mode
 CSRs and should use an `MRET` to resume execution at the address in `stvec`.
-
 Supervisor Software Events (SSE) cite:[SSE], an extension to the SBI, provide a
 mechanism for supervisor software to register and service system events
 emanating from an SBI implementation, such as firmware or a hypervisor. In the
@@ -238,6 +237,8 @@ When a hart resumes from Debug Mode, if the new privilege mode is less privilege
 than M-mode, `mstatus.MDT` is set to 0. If it is less privileged than S/HS-mode,
 `sstatus.SDT` is set to 0. If it is less privileged than VS-mode, `vsstatus.SDT`
 is set to 0.
+
+<<<
 
 [NOTE]
 ====
