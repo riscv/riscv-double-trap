@@ -221,7 +221,7 @@ the affected hart or restarting the entire platform, among others.
 
 The `MRET` and `SRET` instructions, when executed in M-mode, set the `MDT` bit
 to 0. If the new privilege mode is U, VS, or VU, then `sstatus.SDT` is also set
-to 0. If it is VU, then `vsstatus.SDT` is also set to 0.
+to 0. Additionally, if it is VU, then `vsstatus.SDT` is also set to 0.
 
 The Smdbltrp extension introduces a read-write critical-error-trigger (`cetrig`)
 field (bit 19) to the `dcsr` CSR cite:[DBG]. When `cetrig` is set to 1, a hart
@@ -233,10 +233,9 @@ highest priority among all reasons for entering Debug Mode. Resuming from Debug
 Mode following an entry from the critical error state returns the hart to the
 critical error state.
 
-When a hart resumes from Debug Mode, if the new privilege mode is not M-mode,
-then `MDT` bit is set to 0. If the new privilege mode is U, VS, or VU, then
-`sstatus.SDT` is also set to 0. Additionally, if it is VU, then `vsstatus.SDT`
-is set to 0.
+When a hart resumes from Debug Mode, if the new privilege mode is not M, then
+the `MDT` bit is set to 0. If it is U, VS, or VU, then `sstatus.SDT` is also set
+to 0. Additionally, if it is VU, then `vsstatus.SDT` is also set to 0.
 
 <<<
 
