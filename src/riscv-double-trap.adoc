@@ -133,10 +133,6 @@ taken into M-mode. The `mtval2` register is then set to what would be otherwise
 written into the `mcause` register by the _unexpected trap_. The `mcause`
 register is set to 16, the double-trap exception code.
 
-In S-mode, the `SRET` instruction sets `sstatus.SDT` to 0, and if the new
-privilege mode is VU, it also sets `vsstatus.SDT` to 0. However, in VS-mode,
-only `vsstatus.SDT` is set to to 0.
-
 [NOTE]
 ====
 After a trap handler has saved the state, such as `scause`, `sepc`, 
@@ -165,6 +161,17 @@ invoke a critical-error handler in VS-mode or S/HS-mode, respectively.
 Additionally, the implementation of an SSE protocol can be considered as an
 optional measure to aid in the recovery from such critical errors.
 ====
+
+In S-mode, the `SRET` instruction sets `sstatus.SDT` to 0, and if the new
+privilege mode is VU, it also sets `vsstatus.SDT` to 0. However, in VS-mode,
+only `vsstatus.SDT` is set to to 0.
+
+The `MRET` instructions sets `sstatus.SDT` to 0, if the new privilege mode is
+U, VS, or VU. Additionally, if it is VU, then `vsstatus.SDT` is also set to 0.
+
+When a hart resumes from Debug Mode, if the new privilege mode is U, VS, or VU,
+then `sstatus.SDT` is set to 0. Additionally, if it is VU, then `vsstatus.SDT`
+is also set to 0.
 
 <<<
 
