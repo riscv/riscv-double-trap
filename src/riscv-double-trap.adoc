@@ -192,11 +192,12 @@ in `mstatush` and the `MIE` bit in `mstatus` register).
 
 When a trap is to be taken into M-mode, if the `MDT` bit is currently 0, it is
 then set to 1, and the trap is delivered as expected. However, if `MDT` is
-already set to 1, then this is an _unexpected trap_. Additionally, when the
-Smrnmi extension is implemented, a trap that occurs when executing in M-mode
-with `mnstatus.NMIE` set to 0 is an _unexpected trap_. A trap caused by an RNMI
-is not considered an _unexpected trap_. The _unexpected trap_ is handled as
-follows:
+already set to 1, then this is an _unexpected trap_. When the Smrnmi extension
+is implemented, a trap caused by an RNMI is not considered an _unexpected trap_
+irrespective of the state of the `MDT` bit. A trap caused by an RNMI does not
+set the `MDT` bit. However, a trap that occurs when executing in M-mode with
+`mnstatus.NMIE` set to 0 is an _unexpected trap_. The _unexpected trap_ is
+handled as follows:
 
 * When the Smrnmi extension is implemented and `mnstatus.NMIE` is 1, the hart
   traps to the RNMI handler. To deliver this trap, the `mnepc` and `mncause`
