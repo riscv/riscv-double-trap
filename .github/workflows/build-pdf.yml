@@ -16,7 +16,7 @@ on:
         options:
           - Draft
           - Frozen
-          - Release
+          - Ratified
           - Stable
         default: Draft
       prerelease:
